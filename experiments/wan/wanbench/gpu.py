@@ -73,6 +73,7 @@ def run_smoke(args, root):
            "driver_inventory": driver.stdout.strip()}
     config = {"shape": shape, "dtype": args.dtype, "seed": args.seed,
               "task": args.task, "reference_source_sha256": digest(root / "wanbench/tasks.py"),
+              "correctness_cases": "seeds 17/18/repeat relative to CLI seed, plus seed+2 shifted by +2 in first input",
               "distribution": "synthetic CPU randn; task-specific scaling; see tasks.py"}
     measurement = {"warmup": args.warmup, "samples": args.samples,
                    "timing": "CUDA events on current stream; candidate must join auxiliary work before returning",
@@ -106,8 +107,10 @@ def run_smoke(args, root):
         raise ValueError("candidate.run must be callable")
     with torch.inference_mode():
         checks = []
-        for seed in [args.seed, args.seed + 1, args.seed]:
+        for seed, stress in [(args.seed, False), (args.seed + 1, False), (args.seed, False), (args.seed + 2, True)]:
             values = inputs(seed)
+            if stress:
+                values[0].add_(2)
             expected = base(*values)
             if isinstance(expected, tuple):
                 expected = tuple(t.clone() for t in expected)
@@ -116,6 +119,7 @@ def run_smoke(args, root):
             start = time.perf_counter()
             verdict = check_output(torch, fn, values, expected, **task["smoke_tolerance"])
             verdict["seed"] = seed
+            verdict["distribution"] = "first-input-shifted-plus-two" if stress else "random"
             verdict["call_wall_seconds"] = time.perf_counter() - start
             checks.append(verdict)
             del expected, values
