@@ -9,12 +9,12 @@
 - 无第三方依赖的环境检查、实验排程、独立工作目录准备与比较校验已实现。
 - 首轮 6 个任务的参考实现与 exploratory GPU runner 已编写，保留 Wan 的中间舍入和 RoPE 精度语义。
 - T3 完整 block 尚未实现。
-- **没有完成框架运行适配，没有生成实验 kernel，没有 B300 性能结果。**
+- 已加入 AutoKernel 固定任务生成入口，尚无完成独立验收的 Agent 性能结果。
 - GPU runner 不是安全隔离的正式 evaluator；候选必须是已审查的可信代码。
 
 ## 首轮范围（2026-09-16 更新）
 
-用户指定第 4 张物理卡：nvidia-smi GPU 3，UUID `GPU-f1b73c7a-e7a3-dd24-a71a-a8f7ebe1f3e8`；屏蔽后进程内使用 cuda:0。首轮只评测 AutoKernel，6 个任务详见 [算子清单](docs/wan-operator-inventory.md)，配置为 `configs/autokernel-first.json`。6 个任务已接入 runner，目标机兼容性待冒烟验证。
+用户指定第 4 张物理卡：nvidia-smi GPU 3，UUID `GPU-f1b73c7a-e7a3-dd24-a71a-a8f7ebe1f3e8`；屏蔽后进程内使用 cuda:0。首轮只评测 AutoKernel，6 个任务详见 [算子清单](docs/wan-operator-inventory.md)，配置为 `configs/autokernel-first.json`。6 个任务已接入 runner，已执行首轮预检，结果与阻塞见 [启动记录](docs/bringup-2026-09-16.md)。
 
 ## 本地检查与准备
 
@@ -94,4 +94,4 @@ python -m unittest discover -s tests -v
 python preflight.py --output runs/preflight-debug --profiles
 ```
 
-预检先检查指定卡无现有计算进程，按顺序运行 6 任务的 eager、原生 compile 和两种 profiler；单子进程上限 420 秒。出现超时即停止。文件锁仅协调本项目进程，不代表平台 GPU 预约。
+预检先检查指定卡无现有计算进程，按顺序运行 6 任务的 eager、原生 compile 和两种 profiler；单子进程上限 420 秒。出现超时或前后检查发现其它计算进程即停止。文件锁仅协调本项目进程，不代表平台 GPU 预约。

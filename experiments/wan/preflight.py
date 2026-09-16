@@ -48,10 +48,10 @@ def main():
     # This coordinates our jobs; it is not a device reservation against other users.
     with (ROOT / "gpu3.lock").open("a") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
-        probe = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"],
-                               capture_output=True, text=True, timeout=15, check=True)
-        if any(env["CUDA_VISIBLE_DEVICES"] in line for line in probe.stdout.splitlines()):
-            raise RuntimeError("selected GPU has an existing compute process; leave it untouched")
+        def occupied():
+            probe = subprocess.run(["nvidia-smi", "--query-compute-apps=gpu_uuid,pid", "--format=csv,noheader"],
+                                   capture_output=True, text=True, timeout=15, check=True)
+            return [line.strip() for line in probe.stdout.splitlines() if env["CUDA_VISIBLE_DEVICES"] in line]
         for task in args.tasks:
             for case in args.cases:
                 variants = [("eager", "none"), ("compile-default", "none")]
@@ -69,8 +69,18 @@ def main():
                         cmd = ["nsys", "profile", "--trace=cuda,nvtx,osrt", "--sample=none",
                                "--capture-range=cudaProfilerApi", "--capture-range-end=stop",
                                "--output=" + str(out / name)] + cmd
+                    before = occupied()
+                    if before:
+                        plan.update(status="blocked-gpu-busy", occupying_processes=before)
+                        dump_new(out / "summary.json", plan)
+                        print("selected GPU has an existing compute process; leave it untouched", flush=True)
+                        return 3
+                    started = datetime.datetime.now(datetime.timezone.utc).isoformat()
                     rc = run_bounded(cmd, out / (name + ".log"), env, 420)
-                    row = {"task": task, "case": case, "variant": variant, "profile": profile,
+                    after = occupied()
+                    row = {"started": started, "ended": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                           "occupancy_before": before, "occupancy_after": after, "contention_detected": bool(after),
+                           "task": task, "case": case, "variant": variant, "profile": profile,
                            "returncode": rc, "artifact": str(target) if target.exists() else None}
                     if target.exists():
                         data = load_json(target)
@@ -82,6 +92,11 @@ def main():
                     # Snapshot for progress only, raw measurements stay immutable.
                     (out / "progress.json").write_text(json.dumps(plan, indent=2) + "\n")
                     print(json.dumps(row), flush=True)
+                    if after:
+                        plan["status"] = "blocked-gpu-busy"
+                        dump_new(out / "summary.json", plan)
+                        print("other process detected after measurement; timings need revalidation", flush=True)
+                        return 3
                     if rc == 124:
                         raise RuntimeError("GPU subprocess timed out; stop preflight and inspect device before continuing")
     plan["status"] = "complete" if all(r["returncode"] == 0 for r in plan["results"]) else "completed-with-failures"

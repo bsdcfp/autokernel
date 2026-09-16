@@ -10,8 +10,8 @@ import os
 from pathlib import Path
 import subprocess
 import time
+import tomllib
 
-from preflight import run_bounded
 from wanbench.core import digest, dump_new
 from wanbench.tasks import TASK_IDS
 
@@ -76,7 +76,12 @@ FROZEN REFERENCE AND FIXTURES:\n{(ROOT / 'wanbench/tasks.py').read_text()}
             import signal
             os.killpg(proc.pid, signal.SIGKILL)
             proc.wait(); rc = 124
-    record = {'framework': 'autokernel-wan-fixed-task-adapter', 'task': args.task,
+    cfg = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))) / "config.toml"
+    public_config = {}
+    if cfg.is_file():
+        values = tomllib.loads(cfg.read_text())
+        public_config = {key: values.get(key) for key in ["model", "model_reasoning_effort"]}
+    record = {"configured_model": public_config,'framework': 'autokernel-wan-fixed-task-adapter', 'task': args.task,
               'kind': 'generation-step', 'formal_ready': False, 'returncode': rc,
               'wall_seconds': time.monotonic() - started, 'budget_seconds': args.seconds,
               'upstream_program_sha256': digest(ROOT.parents[1] / 'program.md'),
