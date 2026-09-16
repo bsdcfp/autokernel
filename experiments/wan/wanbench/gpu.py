@@ -234,6 +234,7 @@ def run_smoke(args, root):
         else:
             torch.cuda.synchronize()
             result["nsys_capture_mode"] = os.environ.get("WANBENCH_NSYS_CAPTURE", "cudaProfilerApi")
+            result["nsys_trace_method"] = os.environ.get("WANBENCH_NSYS_TRACE", "unknown")
             result["cuda_profiler_start_return"] = str(torch.cuda.cudart().cudaProfilerStart())
             try:
                 for _ in range(5):

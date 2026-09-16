@@ -1,8 +1,10 @@
 """Run bounded, sequential baseline measurements; never launches an agent."""
 import argparse
+import csv
 import datetime
 import fcntl
 import json
+import io
 import os
 from pathlib import Path
 import signal
@@ -49,6 +51,7 @@ def main():
     ap.add_argument("--timing", choices=["single-call", "cuda-graph"], default="single-call")
     ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
     ap.add_argument("--nsys-capture", choices=["cudaProfilerApi", "none"], default="cudaProfilerApi")
+    ap.add_argument("--nsys-trace", choices=["cuda", "cuda-sw"], default="cuda-sw")
     args = ap.parse_args()
     if args.timing == "cuda-graph" and (args.profiles or args.nsys_only):
         raise ValueError("graph timing must be separate from ordinary-call profiles")
@@ -64,6 +67,7 @@ def main():
     env["PYTHONPATH"] = str(ROOT)
     env["PYTHONUNBUFFERED"] = "1"
     env["WANBENCH_NSYS_CAPTURE"] = args.nsys_capture
+    env["WANBENCH_NSYS_TRACE"] = args.nsys_trace
     temporary = out / "tmp"
     temporary.mkdir()
     env["TMPDIR"] = str(temporary)
@@ -95,7 +99,7 @@ def main():
                         cmd += ["--candidate", str(candidate)]
                     if profile == "nsys":
                         capture_end = [] if args.nsys_capture == "none" else ["--capture-range-end=stop"]
-                        cmd = ["nsys", "profile", "--trace=cuda,nvtx,osrt", "--sample=none",
+                        cmd = ["nsys", "profile", "--trace=" + args.nsys_trace + ",nvtx,osrt", "--sample=none",
                                "--capture-range=" + args.nsys_capture,
                                "--output=" + str(out / name)] + capture_end + cmd
                     before = occupied()
@@ -116,9 +120,23 @@ def main():
                         row.update(status=data["status"], p50_ms=data.get("p50_ms"),
                                    max_errors=[x.get("max_abs_error") for x in data["correctness"]["checks"]])
                     if profile == "nsys":
-                        row["nsys_report_exists"] = (out / (name + ".nsys-rep")).is_file()
+                        report = out / (name + ".nsys-rep")
+                        row["nsys_report_exists"] = report.is_file()
+                        row["nsys_cuda_kernel_instances"] = 0
+                        row["nsys_trace"] = args.nsys_trace
+                        if report.is_file():
+                            stats = subprocess.run(["nsys", "stats", "--report", "cuda_gpu_kern_sum",
+                                                    "--format", "csv", str(report)],
+                                                   capture_output=True, text=True, env=env, timeout=120)
+                            (out / (name + ".stats.log")).write_text(stats.stdout + stats.stderr)
+                            row["nsys_stats_returncode"] = stats.returncode
+                            lines = stats.stdout.splitlines()
+                            first = next((i for i, line in enumerate(lines) if "Total Time (ns)" in line and "Instances" in line), None)
+                            if first is not None and stats.returncode == 0:
+                                entries = csv.DictReader(io.StringIO("\n".join(lines[first:])))
+                                row["nsys_cuda_kernel_instances"] = sum(int(r["Instances"]) for r in entries if (r.get("Instances") or "").isdigit())
                     row["successful"] = (rc == 0 and row["status"] == "pass" and
-                                         (profile != "nsys" or row["nsys_report_exists"]))
+                                         (profile != "nsys" or row["nsys_cuda_kernel_instances"] > 0))
                     plan["results"].append(row)
                     # Snapshot for progress only, raw measurements stay immutable.
                     (out / "progress.json").write_text(json.dumps(plan, indent=2) + "\n")
