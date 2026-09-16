@@ -9,7 +9,7 @@ import signal
 import subprocess
 import sys
 
-from wanbench.core import dump_new, load_json
+from wanbench.core import digest, dump_new, load_json
 from wanbench.tasks import TASK_IDS
 
 ROOT = Path(__file__).resolve().parent
@@ -27,14 +27,33 @@ def run_bounded(cmd, logfile, env, seconds):
             return 124
 
 
+def resolve_candidate(root, mapping, task):
+    path = (root / mapping[task]).resolve()
+    if not path.is_relative_to(root.resolve()):
+        raise ValueError("candidate must stay inside experiment directory")
+    generation = load_json(path.parent / "generation.json")
+    if generation["task"] != task or digest(path) != generation["candidate_sha256"]:
+        raise ValueError("candidate differs from recorded generation")
+    return path
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--tasks", nargs="+", choices=TASK_IDS, default=list(TASK_IDS))
     ap.add_argument("--cases", nargs="+", choices=["debug", "medium", "long"], default=["debug"])
+    ap.add_argument("--variants", nargs="+", choices=["eager", "compile-default", "candidate"], default=["eager", "compile-default"])
+    ap.add_argument("--candidate-map", type=Path)
+    ap.add_argument("--reviewed-candidates", action="store_true", help="operator confirms source review; this is not a sandbox")
     ap.add_argument("--profiles", action="store_true")
     ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
     args = ap.parse_args()
+    candidates = {}
+    if "candidate" in args.variants:
+        if not args.reviewed_candidates or args.candidate_map is None:
+            raise ValueError("candidate execution requires source review and a candidate map")
+        mapping = load_json(args.candidate_map)
+        candidates = {task: resolve_candidate(ROOT, mapping, task) for task in args.tasks}
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
     env["CUDA_VISIBLE_DEVICES"] = load_json(ROOT / "configs/device.json")["uuid"]
@@ -44,7 +63,7 @@ def main():
     temporary.mkdir()
     env["TMPDIR"] = str(temporary)
     plan = {"status": "running", "kind": "synthetic-preflight", "started": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-            "gpu_uuid": env["CUDA_VISIBLE_DEVICES"], "tasks": args.tasks, "cases": args.cases, "results": []}
+            "gpu_uuid": env["CUDA_VISIBLE_DEVICES"], "variants": args.variants, "tasks": args.tasks, "cases": args.cases, "results": []}
     # This coordinates our jobs; it is not a device reservation against other users.
     with (ROOT / "gpu3.lock").open("a") as lock:
         fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -54,17 +73,20 @@ def main():
             return [line.strip() for line in probe.stdout.splitlines() if env["CUDA_VISIBLE_DEVICES"] in line]
         for task in args.tasks:
             for case in args.cases:
-                variants = [("eager", "none"), ("compile-default", "none")]
+                variants = [(variant, "none") for variant in args.variants]
                 if args.profiles:
-                    variants += [("compile-default", "torch"), ("compile-default", "nsys")]
+                    variants += [(variant, profile) for variant in args.variants if variant != "eager" for profile in ("torch", "nsys")]
                 if args.nsys_only:
-                    variants = [("compile-default", "nsys")]
+                    variants = [(variant, "nsys") for variant in args.variants if variant != "eager"]
                 for variant, profile in variants:
                     name = f"{task}-{case}-{variant}-{profile}"
                     target = out / (name + ".json")
                     cmd = [sys.executable, "-m", "wanbench", "smoke", "--task", task,
                            "--case", case, "--variant", variant, "--profile", profile,
                            "--samples", "50", "--warmup", "10", "--output", str(target)]
+                    if variant == "candidate":
+                        candidate = resolve_candidate(ROOT, mapping, task)
+                        cmd += ["--candidate", str(candidate)]
                     if profile == "nsys":
                         cmd = ["nsys", "profile", "--trace=cuda,nvtx,osrt", "--sample=none",
                                "--capture-range=cudaProfilerApi", "--capture-range-end=stop",
