@@ -46,8 +46,11 @@ def main():
     ap.add_argument("--candidate-map", type=Path)
     ap.add_argument("--reviewed-candidates", action="store_true", help="operator confirms source review; this is not a sandbox")
     ap.add_argument("--profiles", action="store_true")
+    ap.add_argument("--timing", choices=["single-call", "cuda-graph"], default="single-call")
     ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
     args = ap.parse_args()
+    if args.timing == "cuda-graph" and (args.profiles or args.nsys_only):
+        raise ValueError("graph timing must be separate from ordinary-call profiles")
     candidates = {}
     if "candidate" in args.variants:
         if not args.reviewed_candidates or args.candidate_map is None:
@@ -83,7 +86,8 @@ def main():
                     target = out / (name + ".json")
                     cmd = [sys.executable, "-m", "wanbench", "smoke", "--task", task,
                            "--case", case, "--variant", variant, "--profile", profile,
-                           "--samples", "50", "--warmup", "10", "--output", str(target)]
+                           "--samples", "50", "--warmup", "10", "--timing", args.timing,
+                           "--output", str(target)]
                     if variant == "candidate":
                         candidate = resolve_candidate(ROOT, mapping, task)
                         cmd += ["--candidate", str(candidate)]

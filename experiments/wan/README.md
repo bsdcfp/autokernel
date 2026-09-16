@@ -95,3 +95,15 @@ python preflight.py --output runs/preflight-debug --profiles
 ```
 
 预检先检查指定卡无现有计算进程，按顺序运行 6 任务的 eager、原生 compile 和两种 profiler；单子进程上限 420 秒。出现超时或前后检查发现其它计算进程即停止。文件锁仅协调本项目进程，不代表平台 GPU 预约。
+# Additional timing mode
+
+`preflight.py --timing cuda-graph` captures 32 ordinary function calls and times
+50 graph replays, dividing each CUDA-event duration by 32. This reduces Python
+launch gaps for small operators. It is a separate hot-cache metric, not ordinary
+host-call latency or whole-block speedup. The native reference is still compiled
+with `torch.compile(..., mode="default")` before graph capture. Graph replay is
+checked with a fresh seed after replacing static input values. Compare only runs
+with matching measurement hashes. Profiler runs remain ordinary calls.
+
+Implementation follows the [PyTorch CUDA Graph recipe](https://pytorch.org/blog/accelerating-pytorch-with-cuda-graphs/)
+and [CUDAGraph API](https://docs.pytorch.org/docs/2.12/generated/torch.cuda.graphs.CUDAGraph.html).

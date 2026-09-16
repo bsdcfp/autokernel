@@ -58,6 +58,9 @@ def check_output(torch, fn, inputs, expected, atol, rtol):
 
 def run_smoke(args, root):
     positive_int(args.warmup, "warmup"); positive_int(args.samples, "samples")
+    positive_int(args.graph_repeats, "graph repeats")
+    if args.timing == "cuda-graph" and args.profile != "none":
+        raise ValueError("CUDA Graph timing and ordinary-call profiles are separate runs")
     if args.samples < 2:
         raise ValueError("at least two samples required")
     if args.output.exists():
@@ -96,6 +99,9 @@ def run_smoke(args, root):
                    "timing": "CUDA events on current stream; candidate must join auxiliary work before returning",
                    "input_cache": "single-synthetic-input-hot-cache",
                    "matmul_tf32": False, "cudnn_tf32": False}
+    if args.timing == "cuda-graph":
+        measurement.update(timing="CUDA events around one graph replay, divided by captured calls",
+                           graph_repeats=args.graph_repeats, graph_validation_seed=args.seed + 3)
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     candidate_hash = digest(args.candidate) if args.candidate else None
@@ -155,19 +161,60 @@ def run_smoke(args, root):
         del output
         torch.cuda.reset_peak_memory_stats(device)
         if args.profile == "none":
+            graph = None
+            repeats = 1
+            if args.timing == "cuda-graph":
+                # Official PyTorch CUDA Graph recipe: warm up on a side stream;
+                # keep input and output storage alive across replay.
+                stream = torch.cuda.Stream()
+                stream.wait_stream(torch.cuda.current_stream())
+                with torch.cuda.stream(stream):
+                    for _ in range(3):
+                        output = fn(*values)
+                torch.cuda.current_stream().wait_stream(stream)
+                torch.cuda.synchronize()
+                graph = torch.cuda.CUDAGraph()
+                repeats = args.graph_repeats
+                with torch.cuda.graph(graph):
+                    for _ in range(repeats):
+                        graph_output = fn(*values)
+                fresh = inputs(args.seed + 3)
+                def replay_with_inputs(*new_values):
+                    for static, new in zip(values, new_values):
+                        static.copy_(new)
+                    graph.replay()
+                    return graph_output
+                graph_verdict = check_output(torch, replay_with_inputs, fresh,
+                                             base(*fresh), **task["smoke_tolerance"])
+                result["graph_correctness"] = graph_verdict
+                if not graph_verdict["passed"]:
+                    result["status"] = "fail"
+                    dump_new(args.output, result)
+                    return result
+                original = inputs(args.seed)
+                for static, new in zip(values, original):
+                    static.copy_(new)
+                del original, fresh
+                for _ in range(args.warmup):
+                    graph.replay()
+                torch.cuda.synchronize()
             samples, walls = [], []
             for _ in range(args.samples):
                 a, b = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
                 torch.cuda.synchronize()
                 start = time.perf_counter()
                 a.record()
-                output = fn(*values)
+                if graph is None:
+                    output = fn(*values)
+                else:
+                    graph.replay()
                 b.record()
                 b.synchronize()
                 torch.cuda.synchronize()
-                walls.append((time.perf_counter() - start) * 1000)
-                samples.append(a.elapsed_time(b))
-                del output
+                walls.append((time.perf_counter() - start) * 1000 / repeats)
+                samples.append(a.elapsed_time(b) / repeats)
+                if graph is None:
+                    del output
             result.update(samples_ms=samples, wall_samples_ms=walls,
                           p50_ms=statistics.median(samples))
         elif args.profile == "torch":

@@ -77,6 +77,8 @@ def main(argv=None):
     p = sub.add_parser("compare-smoke"); p.add_argument("baseline", type=Path); p.add_argument("candidate", type=Path)
     p = sub.add_parser("smoke"); p.add_argument("--variant", choices=["eager", "compile-default", "candidate"], default="compile-default"); p.add_argument("--candidate", type=Path); p.add_argument("--case", choices=["debug", "medium", "long"], default="debug"); p.add_argument("--profile", choices=["none", "torch", "nsys"], default="none"); p.add_argument("--output", type=Path, required=True); p.add_argument("--seed", type=int, default=17); p.add_argument("--dtype", choices=["bfloat16", "float32"], default="bfloat16"); p.add_argument("--warmup", type=int, default=20); p.add_argument("--samples", type=int, default=100); p.add_argument("--device", type=int, default=0)
     p.add_argument("--task", choices=TASK_IDS, default="t1-norm-modulation")
+    p.add_argument("--timing", choices=["single-call", "cuda-graph"], default="single-call")
+    p.add_argument("--graph-repeats", type=int, default=32)
     args = parser.parse_args(argv)
     try:
         if args.command == "doctor":
