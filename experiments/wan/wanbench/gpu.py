@@ -233,14 +233,15 @@ def run_smoke(args, root):
             result["trace"] = str(trace)
         else:
             torch.cuda.synchronize()
-            torch.cuda.cudart().cudaProfilerStart()
+            result["nsys_capture_mode"] = os.environ.get("WANBENCH_NSYS_CAPTURE", "cudaProfilerApi")
+            result["cuda_profiler_start_return"] = str(torch.cuda.cudart().cudaProfilerStart())
             try:
                 for _ in range(5):
                     with torch.cuda.nvtx.range("wanbench/" + args.task):
                         output = fn(*values)
                 torch.cuda.synchronize()
             finally:
-                torch.cuda.cudart().cudaProfilerStop()
+                result["cuda_profiler_stop_return"] = str(torch.cuda.cudart().cudaProfilerStop())
             result["capture_note"] = "Requires external nsys profile; no report existence is asserted."
         result["peak_allocated_bytes"] = torch.cuda.max_memory_allocated(device)
         result["peak_reserved_bytes"] = torch.cuda.max_memory_reserved(device)

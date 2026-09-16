@@ -48,6 +48,7 @@ def main():
     ap.add_argument("--profiles", action="store_true")
     ap.add_argument("--timing", choices=["single-call", "cuda-graph"], default="single-call")
     ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
+    ap.add_argument("--nsys-capture", choices=["cudaProfilerApi", "none"], default="cudaProfilerApi")
     args = ap.parse_args()
     if args.timing == "cuda-graph" and (args.profiles or args.nsys_only):
         raise ValueError("graph timing must be separate from ordinary-call profiles")
@@ -62,6 +63,7 @@ def main():
     env["CUDA_VISIBLE_DEVICES"] = load_json(ROOT / "configs/device.json")["uuid"]
     env["PYTHONPATH"] = str(ROOT)
     env["PYTHONUNBUFFERED"] = "1"
+    env["WANBENCH_NSYS_CAPTURE"] = args.nsys_capture
     temporary = out / "tmp"
     temporary.mkdir()
     env["TMPDIR"] = str(temporary)
@@ -93,7 +95,7 @@ def main():
                         cmd += ["--candidate", str(candidate)]
                     if profile == "nsys":
                         cmd = ["nsys", "profile", "--trace=cuda,nvtx,osrt", "--sample=none",
-                               "--capture-range=cudaProfilerApi", "--capture-range-end=stop",
+                               "--capture-range=" + args.nsys_capture, "--capture-range-end=stop",
                                "--output=" + str(out / name)] + cmd
                     before = occupied()
                     if before:

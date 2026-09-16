@@ -37,6 +37,7 @@ def main():
                 row['kernel_duration_sum_us'] = sum(e.get('dur', 0) for e in kernels)
                 row['kernel_names'] = dict(Counter(e['name'] for e in kernels))
             if data['profile'] == 'nsys':
+                row['capture_mode'] = data.get('nsys_capture_mode', 'cudaProfilerApi')
                 report = path.with_suffix('.nsys-rep')
                 row['report_exists'] = report.is_file()
                 if report.is_file() and args.nsys_stats:
@@ -53,7 +54,8 @@ def main():
                     if start is not None:
                         entries = list(csv.DictReader(io.StringIO('\n'.join(lines[start:]))))
                         entries = [r for r in entries if (r.get('Instances') or '').isdigit()]
-                        row['profiled_calls'] = 5
+                        row['profiled_calls'] = 5 if row['capture_mode'] == 'cudaProfilerApi' else None
+                        row['scope'] = 'measurement calls' if row['capture_mode'] == 'cudaProfilerApi' else 'entire process, diagnostic only'
                         row['kernel_count'] = sum(int(r['Instances']) for r in entries)
                         row['kernel_duration_sum_us'] = sum(float(r['Total Time (ns)']) for r in entries) / 1000
                         row['kernel_names'] = {r['Name']: int(r['Instances']) for r in entries}
