@@ -2,11 +2,22 @@
 import argparse
 import importlib.util
 import json
+import math
 import os
 from pathlib import Path
 from preflight import ROOT, resolve_candidate
 from wanbench.core import digest, dump_new, load_json, validate_device_selection
 from wanbench.tasks import build_reference, make_inputs, rmsnorm, rope3d, flatten_outputs
+
+
+def nearest_bf16(value):
+    """Round finite in-range binary64 directly, without a float32 midpoint hop."""
+    if not math.isfinite(value) or abs(value) > float.fromhex('0x1.fep127'):
+        raise ValueError('diagnostic oracle expects finite BF16-range values')
+    if value == 0:
+        return value
+    quantum = math.ldexp(1.0, max(math.frexp(abs(value))[1] - 8, -133))
+    return round(value / quantum) * quantum
 
 
 def main():
@@ -98,7 +109,10 @@ def main():
                         mean32=xr.float().square().mean(); inv32=torch.rsqrt(mean32+1e-6)
                         mean64=xr.double().square().mean(); inv64=torch.rsqrt(mean64+1e-6)
                         eager_norm=(xr.float()*inv32).bfloat16()
-                        oracle_norm=(xr.double()*inv64).bfloat16()
+                        norm64=xr.double()*inv64
+                        # A framework double->BF16 cast may itself pass through
+                        # FP32. At a BF16 midpoint that would invalidate the oracle.
+                        oracle_norm=torch.tensor([nearest_bf16(v) for v in norm64.tolist()],device=x.device,dtype=torch.bfloat16)
                         full_norm=rmsnorm(torch,x,torch.ones_like(weight)).reshape(-1,1536)[row]
                         full_weighted=rmsnorm(torch,x,weight).reshape(-1,1536)[row]
                         pair=lambda z:[float(v) for v in z[even:even+2].tolist()]
@@ -114,6 +128,7 @@ def main():
                             'mean32':mean32.item(),'mean64':mean64.item(),'inv32':inv32.item(),'inv64':inv64.item(),
                             'input_pair':pair(xr),'weight_pair':pair(weight),
                             'normalized_fp64_pair':pair(xr.double()*inv64),
+                            'framework_fp64_cast_pair':pair(norm64.bfloat16()),
                             'eager_row_norm_pair':pair(eager_norm),'eager_full_norm_pair':pair(full_norm),
                             'oracle_bf16_norm_pair':pair(oracle_norm),'candidate_norm_pair':pair(cn.reshape(-1,1536)[row]),
                             'eager_weighted_pair':pair(full_weighted),'candidate_weighted_pair':pair(cw.reshape(-1,1536)[row])})

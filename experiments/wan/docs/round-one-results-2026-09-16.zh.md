@@ -44,7 +44,7 @@ LayerNorm + 调制的首轮中/长候选为 20.065 / 80.910 μs；RMSNorm 为 8.
 
 Debug 的 QK compile 有 24 个超门限元素，最严重误差为门限的约 2.164 倍（0.458124 vs 0.490375）。FFN compile 有 4 个超门限元素，最严重约 1.026 倍（2.015625 vs 2.046875）。两者三种尺寸的 compile 均失败。
 
-QK 候选 debug 通过，但在 medium、long 失败。这说明小尺寸通过不能代替尺度覆盖。当前数据不足以断言 compile 失败的具体根因；需要进一步定位融合、归约及中间 BF16 舍入边界。失败项不计时、不作为加速比分母。
+QK 候选 debug 通过，但在 medium、long 失败。这说明小尺寸通过不能代替尺度覆盖。后续排查已定位 FFN addmm 重写的舍入变化，并将 QK long seed 18 的 compile 超差从 5,951 降至 1；残余问题尚未解决，见[精度排查报告](precision-investigation-2026-09-16.zh.md)。失败项不计时、不作为加速比分母。
 
 ## 3. torch.profiler 与 nsys 的证据
 
