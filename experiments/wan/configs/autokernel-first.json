@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "id": "autokernel-b300-first",
+  "status": "draft",
+  "condition": "native",
+  "frameworks": [
+    "autokernel"
+  ],
+  "tasks": [
+    "t1-norm-modulation",
+    "wan-gated-residual",
+    "wan-rmsnorm",
+    "wan-rope3d",
+    "t2-qknorm-rope",
+    "wan-linear-gelu"
+  ],
+  "repeats": 3,
+  "order_seed": 20260916,
+  "wall_seconds": 3600,
+  "token_limit": null,
+  "candidate_limit": null,
+  "gpu": "B300",
+  "models": null,
+  "gpu_allocation": {
+    "requested": "fourth physical GPU",
+    "nvidia_smi_index": 3,
+    "uuid": "GPU-f1b73c7a-e7a3-dd24-a71a-a8f7ebe1f3e8",
+    "process_logical_index": 0,
+    "status": "uuid-verified-recheck-occupancy-before-run"
+  },
+  "scope_approval": {
+    "status": "user-confirmed",
+    "date": "2026-09-16",
+    "frameworks": [
+      "autokernel"
+    ],
+    "tasks": [
+      "t1-norm-modulation",
+      "wan-gated-residual",
+      "wan-rmsnorm",
+      "wan-rope3d",
+      "t2-qknorm-rope",
+      "wan-linear-gelu"
+    ],
+    "physical_gpu_index": 3,
+    "note": "User confirmed the six first-round tasks. Numerical gates, runtime, model configuration and budgets still require calibration/freeze before formal execution."
+  }
+}

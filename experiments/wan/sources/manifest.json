@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "files": [
+    {
+      "path": "sources/auto-model-optim-AGENTS.md",
+      "url": "https://raw.githubusercontent.com/heygen-com/auto-model-optim/5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb/AGENTS.md",
+      "bytes": 2920,
+      "sha256": "dc12b9c4abdc9471f5bbe912d30e921696e53d211457e7e84bed8f9034695a1b"
+    },
+    {
+      "path": "sources/auto-model-optim-README.md",
+      "url": "https://raw.githubusercontent.com/heygen-com/auto-model-optim/5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb/README.md",
+      "bytes": 4431,
+      "sha256": "3a4bd99534bfed53c62b0bda72d154784dd7b233e69b982ab0e846238b38d53e"
+    },
+    {
+      "path": "sources/auto-model-optim-goals.json",
+      "url": "https://raw.githubusercontent.com/heygen-com/auto-model-optim/5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb/goals.json",
+      "bytes": 2214,
+      "sha256": "2dd52065b8ff3a99507a02a41407b0d2be1fa7b58a39c05ab842e4078fec7535"
+    },
+    {
+      "path": "sources/auto-model-optim-harness__run_experiment.py",
+      "url": "https://raw.githubusercontent.com/heygen-com/auto-model-optim/5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb/harness/run_experiment.py",
+      "bytes": 7401,
+      "sha256": "c817a636907ad20f46bb5fb4eb6122c5d0cb5d4f99fac648166209ebd83a864b"
+    },
+    {
+      "path": "sources/auto-model-optim-program.md",
+      "url": "https://raw.githubusercontent.com/heygen-com/auto-model-optim/5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb/program.md",
+      "bytes": 12892,
+      "sha256": "2ee20a5cfd1c92715d4fff4b1d296b221ccf74bef04de0fdc5c735a8dc515992"
+    },
+    {
+      "path": "sources/autokernel-LICENSE",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/autokernel/78435821cc3d5756ba6ee1785c397f6d8fa8c90d/LICENSE",
+      "bytes": 1068,
+      "sha256": "468e1c94fd1df17861656d2d03d3f01e2f93cd39aac50b6c89208f94d8db5033"
+    },
+    {
+      "path": "sources/autokernel-README.md",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/autokernel/78435821cc3d5756ba6ee1785c397f6d8fa8c90d/README.md",
+      "bytes": 12848,
+      "sha256": "d91d806e8a9ff5d84ada7fdca53eb49bc965198920b7cbcf019cff0675d27214"
+    },
+    {
+      "path": "sources/autokernel-program.md",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/autokernel/78435821cc3d5756ba6ee1785c397f6d8fa8c90d/program.md",
+      "bytes": 32888,
+      "sha256": "c9ae680b2548edf7a2998e23ccbcf5c4eb88ef6dc1bd9a209a5a7576beb233eb"
+    },
+    {
+      "path": "sources/automegakernel-LICENSE",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/AutoMegaKernel/a514bbc20a03bbf698a17443f8f14a27a617fc10/LICENSE",
+      "bytes": 1068,
+      "sha256": "468e1c94fd1df17861656d2d03d3f01e2f93cd39aac50b6c89208f94d8db5033"
+    },
+    {
+      "path": "sources/automegakernel-README.md",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/AutoMegaKernel/a514bbc20a03bbf698a17443f8f14a27a617fc10/README.md",
+      "bytes": 15945,
+      "sha256": "1af244462ffa8fca6cc279000a14e438a2b6ac297086498fcc7f140d8090f738"
+    },
+    {
+      "path": "sources/automegakernel-docs__AGENT_HARNESS.md",
+      "url": "https://raw.githubusercontent.com/RightNow-AI/AutoMegaKernel/a514bbc20a03bbf698a17443f8f14a27a617fc10/docs/AGENT_HARNESS.md",
+      "bytes": 14839,
+      "sha256": "f7a4cb4cd51999e98a6cbc85bbf2af7be7286039cc6e9902b5db074c43d589d6"
+    },
+    {
+      "path": "sources/kda-LICENSE",
+      "url": "https://raw.githubusercontent.com/NVlabs/kda/ef6ce617693ef0782b3ecb9f37e39bbf10226a90/LICENSE",
+      "bytes": 30220,
+      "sha256": "79a6a78693f4e02b1f43837ceb014aefda32d319e4298425c7314465c26abe23"
+    },
+    {
+      "path": "sources/kda-README.md",
+      "url": "https://raw.githubusercontent.com/NVlabs/kda/ef6ce617693ef0782b3ecb9f37e39bbf10226a90/README.md",
+      "bytes": 6102,
+      "sha256": "b2a3f7ed36ff98e874600e161f061b2c8b1588cc31746406900f15f8273b90d6"
+    },
+    {
+      "path": "sources/kda-pilot-README.md",
+      "url": "https://raw.githubusercontent.com/BBuf/KDA-Pilot/bac966ba09fe22f6220ff527c7c3555e539d5fe6/README.md",
+      "bytes": 12482,
+      "sha256": "9eb45f162531e992ec06cf744d4c89ddbecccf45ab710932a4efe7cc941dfc86"
+    },
+    {
+      "path": "sources/kda-pilot-diffusion__README.md",
+      "url": "https://raw.githubusercontent.com/BBuf/KDA-Pilot/bac966ba09fe22f6220ff527c7c3555e539d5fe6/diffusion/README.md",
+      "bytes": 6175,
+      "sha256": "9917f32b44a397602ef71c2e66a87b50b28adfa55e6b674808a854a0384a6329"
+    },
+    {
+      "path": "sources/kda-pilot-diffusion__scripts__launch_kda_kernel_task.sh",
+      "url": "https://raw.githubusercontent.com/BBuf/KDA-Pilot/bac966ba09fe22f6220ff527c7c3555e539d5fe6/diffusion/scripts/launch_kda_kernel_task.sh",
+      "bytes": 18285,
+      "sha256": "d772cb381e1c824f3e5a07f31f40467da19edb3023b3d1ea3ab2ee3b8e9484b1"
+    },
+    {
+      "path": "sources/wan-model.py.txt",
+      "url": "https://raw.githubusercontent.com/Wan-Video/Wan2.1/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "bytes": 21289,
+      "sha256": "c1572ade3bf7345bd4c00d4a19535788fab62f9c08b5aeb15f6d01f4435bb47a"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wan-agent-bench"
+version = "0.1.0"
+description = "Independent experiment preparation and measurement for Wan kernel agents"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+wanbench = "wanbench.cli:main"
+
+[tool.setuptools]
+packages = ["wanbench"]

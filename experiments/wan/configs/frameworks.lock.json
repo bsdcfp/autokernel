@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "captured": "2026-09-16",
+  "frameworks": [
+    {
+      "id": "auto-model-optim",
+      "repository": "https://github.com/heygen-com/auto-model-optim",
+      "commit": "5cac740eb2f5d6f4bbe3474d0eefba2380d2bedb",
+      "readme_snapshot": "sources/auto-model-optim-README.md",
+      "status": "source-pinned",
+      "runtime_status": "not-run",
+      "license_status": "root-license-not-found-needs-review",
+      "adapter_status": "pending",
+      "entrypoints": [
+        "program.md",
+        "harness/run_experiment.py"
+      ],
+      "license_note": "Do not infer permission from public visibility"
+    },
+    {
+      "id": "kda-pilot",
+      "repository": "https://github.com/BBuf/KDA-Pilot",
+      "commit": "bac966ba09fe22f6220ff527c7c3555e539d5fe6",
+      "readme_snapshot": "sources/kda-pilot-README.md",
+      "status": "source-pinned",
+      "runtime_status": "not-run",
+      "license_status": "root-license-not-found-needs-review",
+      "adapter_status": "pending",
+      "entrypoints": [
+        "diffusion/README.md",
+        "diffusion/scripts/launch_kda_kernel_task.sh"
+      ],
+      "license_note": "Do not infer permission from public visibility"
+    },
+    {
+      "id": "kda",
+      "repository": "https://github.com/NVlabs/kda",
+      "commit": "ef6ce617693ef0782b3ecb9f37e39bbf10226a90",
+      "readme_snapshot": "sources/kda-README.md",
+      "status": "source-pinned",
+      "runtime_status": "not-run",
+      "license_status": "root-license-file-reviewed",
+      "adapter_status": "pending",
+      "entrypoints": [
+        "README.md",
+        "prompts/"
+      ],
+      "license_note": "NVIDIA dual licensing; inspect each file header"
+    },
+    {
+      "id": "autokernel",
+      "repository": "https://github.com/RightNow-AI/autokernel",
+      "commit": "78435821cc3d5756ba6ee1785c397f6d8fa8c90d",
+      "readme_snapshot": "sources/autokernel-README.md",
+      "status": "source-pinned",
+      "runtime_status": "not-run",
+      "license_status": "root-license-file-reviewed",
+      "adapter_status": "pending",
+      "entrypoints": [
+        "program.md",
+        "bench.py"
+      ],
+      "license_note": "MIT"
+    },
+    {
+      "id": "automegakernel",
+      "repository": "https://github.com/RightNow-AI/AutoMegaKernel",
+      "commit": "a514bbc20a03bbf698a17443f8f14a27a617fc10",
+      "readme_snapshot": "sources/automegakernel-README.md",
+      "status": "source-pinned",
+      "runtime_status": "not-run",
+      "license_status": "root-license-file-reviewed",
+      "adapter_status": "pending",
+      "entrypoints": [
+        "docs/AGENT_HARNESS.md",
+        "amk_mcp.py",
+        "harness.py"
+      ],
+      "license_note": "MIT"
+    }
+  ]
+}

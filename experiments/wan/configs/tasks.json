@@ -1,0 +1,263 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "t1-norm-modulation",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "WanLayerNorm.forward",
+        "WanAttentionBlock.forward"
+      ],
+      "source_lines": [
+        91,
+        102,
+        301,
+        304
+      ],
+      "signature": "run(x, scale, shift) -> output",
+      "semantics": "LayerNorm(x.float(), eps=1e-6, no affine).to(x.dtype).float() * (1 + scale) + shift",
+      "inputs": {
+        "x": "[B,S,1536], BF16 or FP32, contiguous",
+        "scale": "[B,1,1536], FP32, contiguous; e[1] after modulation sum",
+        "shift": "[B,1,1536], FP32, contiguous; e[0] after modulation sum"
+      },
+      "output": "[B,S,1536], FP32; inputs immutable",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "eps": 1e-06,
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "real_activation_manifest": null,
+      "whole_block_adapter": "pending",
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    },
+    {
+      "id": "t2-qknorm-rope",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "scope": "Fuse Q and K full-hidden-dimension RMSNorm with their 3D RoPE. Preserve norm cast/weight order and source FP64 rotation; no head-local RMSNorm substitution.",
+      "real_activation_manifest": null,
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "WanRMSNorm.forward",
+        "WanSelfAttention.forward",
+        "rope_apply"
+      ],
+      "signature": "run(q, k, q_weight, k_weight, grid_sizes_cpu, freqs_complex128) -> (q_out, k_out)",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    },
+    {
+      "id": "t3-block-fusion",
+      "stage": "specification-only",
+      "scope": "Whole WanAttentionBlock; freeze task after B300 baseline trace",
+      "real_activation_manifest": null
+    },
+    {
+      "id": "wan-gated-residual",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "WanAttentionBlock.forward"
+      ],
+      "source_lines": [
+        305,
+        306,
+        312,
+        313
+      ],
+      "scope": "x + y * gate, gate FP32 [B,1,1536]; preserve source promotion and output dtype",
+      "evaluation_focus": "elementwise fusion, memory traffic, mixed dtype",
+      "real_activation_manifest": null,
+      "signature": "run(x, y, gate) -> output",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    },
+    {
+      "id": "wan-rmsnorm",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "WanRMSNorm.forward",
+        "WanRMSNorm._norm"
+      ],
+      "source_lines": [
+        71,
+        88
+      ],
+      "scope": "Q/K norm over full hidden dimension 1536 BEFORE reshaping into 12 heads; FP32 reduction, cast back, then affine weight multiply",
+      "evaluation_focus": "reduction and rounding correctness; include video and text sequence shapes",
+      "real_activation_manifest": null,
+      "signature": "run(x, weight) -> output",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    },
+    {
+      "id": "wan-rope3d",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "rope_apply"
+      ],
+      "source_lines": [
+        40,
+        68
+      ],
+      "scope": "[B,S,12,128], real temporal/height/width grids; source uses FP64/complex128 rotation then FP32 output; padded suffix preserved",
+      "evaluation_focus": "coordinate mapping, precision, layout and metadata costs; no silent FP32 approximation",
+      "real_activation_manifest": null,
+      "signature": "run(x, grid_sizes_cpu, freqs_complex128) -> output",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    },
+    {
+      "id": "wan-linear-gelu",
+      "stage": "exploratory-runner-implemented-not-yet-gpu-validated",
+      "source": "https://github.com/Wan-Video/Wan2.1/blob/9737cba9c1c3c4d04b33fcad41c111989865d315/wan/modules/model.py",
+      "source_symbols": [
+        "WanAttentionBlock.__init__",
+        "WanAttentionBlock.forward"
+      ],
+      "source_lines": [
+        270,
+        273,
+        311
+      ],
+      "scope": "FFN first Linear including bias, 1536 -> 8960, followed by GELU approximate=tanh; include all activation work",
+      "evaluation_focus": "GEMM plus epilogue fusion versus native compile; not SwiGLU",
+      "real_activation_manifest": null,
+      "signature": "run(x, weight, bias) -> output",
+      "cases": {
+        "debug": [
+          1,
+          256,
+          1536
+        ],
+        "medium": [
+          1,
+          7800,
+          1536
+        ],
+        "long": [
+          1,
+          32760,
+          1536
+        ]
+      },
+      "smoke_tolerance": {
+        "atol": 0.01,
+        "rtol": 0.01
+      },
+      "formal_tolerance": null,
+      "epsilon": 1e-06,
+      "fixtures": "synthetic only; see wanbench/tasks.py"
+    }
+  ]
+}

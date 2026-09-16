@@ -1,0 +1,7 @@
+{
+  "requested": "fourth physical GPU",
+  "nvidia_smi_index": 3,
+  "uuid": "GPU-f1b73c7a-e7a3-dd24-a71a-a8f7ebe1f3e8",
+  "process_logical_index": 0,
+  "status": "uuid-verified-recheck-occupancy-before-run"
+}

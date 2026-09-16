@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "id": "b300-wan-pilot",
+  "status": "draft",
+  "condition": "native",
+  "frameworks": [
+    "auto-model-optim",
+    "kda-pilot",
+    "kda",
+    "autokernel",
+    "automegakernel"
+  ],
+  "tasks": [
+    "t1-norm-modulation"
+  ],
+  "repeats": 3,
+  "order_seed": 20260916,
+  "wall_seconds": 3600,
+  "token_limit": null,
+  "candidate_limit": null,
+  "gpu": "B300",
+  "models": null
+}
