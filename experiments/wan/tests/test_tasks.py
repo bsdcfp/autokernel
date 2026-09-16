@@ -37,6 +37,15 @@ class TaskReferenceTests(unittest.TestCase):
         out = build_reference(t, "t1-norm-modulation")(x, t.ones_like(shift), shift)
         t.testing.assert_close(out, shift.expand_as(out), rtol=0, atol=0)
 
+    def test_layernorm_nonzero_mean_has_correct_variance(self):
+        t = self.t
+        x = t.cat([t.ones(768), t.full((768,), 3)]).to(t.bfloat16).reshape(1, 1, 1536)
+        zeros = t.zeros((1, 1, 1536), dtype=t.float32)
+        out = build_reference(t, "t1-norm-modulation")(x, zeros, zeros)
+        expected = t.cat([-t.ones(768), t.ones(768)]).reshape_as(out)
+        # FP32 layernorm values round to exactly +/-1 in the required BF16 cast.
+        t.testing.assert_close(out, expected, rtol=0, atol=0)
+
     def test_rope_zero_position_and_padding_are_unchanged(self):
         t = self.t
         x, grid, freqs = make_inputs(t, "wan-rope3d", "debug", 9, t.bfloat16, "cpu")

@@ -23,3 +23,11 @@ reduction. Preserve the mandatory intermediate cast and all other interface
 semantics. Do not claim a speedup, correctness pass, or successful compilation:
 the candidate has not run on GPU. An independent nonzero-mean correctness case
 must cover this error after the GPU becomes available.
+
+## Follow-up generation r02
+
+The second call received the previous source and this review. It completed in
+42.50 seconds. A direct source diff shows one correction: `centered = tl.where(mask,
+x - mean, 0.0)` before the variance reduction, with no other computational changes.
+The padded-variance source defect is resolved. Compilation, numerical validation
+and speed remain unverified because the selected GPU is occupied.
