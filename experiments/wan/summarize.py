@@ -26,6 +26,13 @@ def main():
             if data.get('kind') != 'exploratory-gpu':
                 continue
             row = {k: data.get(k) for k in ['task', 'case', 'variant', 'profile', 'status', 'p50_ms']}
+            row['measurement'] = data.get('measurement')
+            row['correctness_checks'] = data.get('correctness', {}).get('checks', [])
+            row['graph_correctness'] = data.get('graph_correctness')
+            if data.get('samples_ms'):
+                ordered = sorted(data['samples_ms'])
+                row['p10_ms'] = ordered[int((len(ordered) - 1) * .1)]
+                row['p90_ms'] = ordered[int((len(ordered) - 1) * .9)]
             row['artifact'] = str(path)
             row['sha256'] = digest(path)
             if data['profile'] == 'torch' and data.get('trace'):
@@ -63,7 +70,7 @@ def main():
     dump_new(args.output, {'kind': 'synthetic-preflight-summary', 'formal_ready': False, 'results': rows})
     for r in rows:
         us = round(r['p50_ms'] * 1000, 3) if r.get('p50_ms') is not None else '-'
-        print(r['task'], r['variant'], r['profile'], r['status'], us, 'us',
+        print(r['task'], r['case'], r['variant'], r['profile'], r['status'], us, 'us',
               'kernels=', r.get('kernel_count', '-'))
 
 
