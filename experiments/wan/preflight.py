@@ -33,12 +33,16 @@ def main():
     ap.add_argument("--tasks", nargs="+", choices=TASK_IDS, default=list(TASK_IDS))
     ap.add_argument("--cases", nargs="+", choices=["debug", "medium", "long"], default=["debug"])
     ap.add_argument("--profiles", action="store_true")
+    ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
     args = ap.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
     env = dict(os.environ)
     env["CUDA_VISIBLE_DEVICES"] = load_json(ROOT / "configs/device.json")["uuid"]
     env["PYTHONPATH"] = str(ROOT)
     env["PYTHONUNBUFFERED"] = "1"
+    temporary = out / "tmp"
+    temporary.mkdir()
+    env["TMPDIR"] = str(temporary)
     plan = {"status": "running", "kind": "synthetic-preflight", "started": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "gpu_uuid": env["CUDA_VISIBLE_DEVICES"], "tasks": args.tasks, "cases": args.cases, "results": []}
     # This coordinates our jobs; it is not a device reservation against other users.
@@ -53,6 +57,8 @@ def main():
                 variants = [("eager", "none"), ("compile-default", "none")]
                 if args.profiles:
                     variants += [("compile-default", "torch"), ("compile-default", "nsys")]
+                if args.nsys_only:
+                    variants = [("compile-default", "nsys")]
                 for variant, profile in variants:
                     name = f"{task}-{case}-{variant}-{profile}"
                     target = out / (name + ".json")
