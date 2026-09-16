@@ -125,7 +125,8 @@ def main():
                         row["nsys_cuda_kernel_instances"] = 0
                         row["nsys_trace"] = args.nsys_trace
                         if report.is_file():
-                            stats = subprocess.run(["nsys", "stats", "--report", "cuda_gpu_kern_sum",
+                            stats_report = "cuda_gpu_kern_sum" + (":nvtx-name" if args.nsys_capture == "none" else "")
+                            stats = subprocess.run(["nsys", "stats", "--report", stats_report,
                                                     "--format", "csv", str(report)],
                                                    capture_output=True, text=True, env=env, timeout=120)
                             (out / (name + ".stats.log")).write_text(stats.stdout + stats.stderr)
@@ -134,6 +135,8 @@ def main():
                             first = next((i for i, line in enumerate(lines) if "Total Time (ns)" in line and "Instances" in line), None)
                             if first is not None and stats.returncode == 0:
                                 entries = csv.DictReader(io.StringIO("\n".join(lines[first:])))
+                                if args.nsys_capture == "none":
+                                    entries = [r for r in entries if "wanbench/" + task in (r.get("Name") or "")]
                                 row["nsys_cuda_kernel_instances"] = sum(int(r["Instances"]) for r in entries if (r.get("Instances") or "").isdigit())
                     row["successful"] = (rc == 0 and row["status"] == "pass" and
                                          (profile != "nsys" or row["nsys_cuda_kernel_instances"] > 0))

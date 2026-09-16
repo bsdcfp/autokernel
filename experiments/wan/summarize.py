@@ -51,7 +51,8 @@ def main():
                     # NVIDIA Nsight Systems UserGuide, CLI nsys stats examples.
                     target = path.with_suffix('.stats.log')
                     env = dict(os.environ, TMPDIR=str(directory.resolve() / 'tmp'))
-                    proc = subprocess.run(['nsys', 'stats', '--report', 'cuda_gpu_kern_sum',
+                    report_type = 'cuda_gpu_kern_sum' + (':nvtx-name' if row['capture_mode'] == 'none' else '')
+                    proc = subprocess.run(['nsys', 'stats', '--report', report_type,
                                            '--format', 'csv', str(report)], capture_output=True,
                                           text=True, env=env, timeout=120)
                     target.write_text(proc.stdout + proc.stderr)
@@ -61,8 +62,10 @@ def main():
                     if start is not None:
                         entries = list(csv.DictReader(io.StringIO('\n'.join(lines[start:]))))
                         entries = [r for r in entries if (r.get('Instances') or '').isdigit()]
-                        row['profiled_calls'] = 5 if row['capture_mode'] == 'cudaProfilerApi' else None
-                        row['scope'] = 'measurement calls' if row['capture_mode'] == 'cudaProfilerApi' else 'entire process, diagnostic only'
+                        if row['capture_mode'] == 'none':
+                            entries = [r for r in entries if 'wanbench/' + row['task'] in (r.get('Name') or '')]
+                        row['profiled_calls'] = 5
+                        row['scope'] = 'measurement calls' if row['capture_mode'] == 'cudaProfilerApi' else 'measurement NVTX ranges only, full process capture'
                         row['kernel_count'] = sum(int(r['Instances']) for r in entries)
                         row['kernel_duration_sum_us'] = sum(float(r['Total Time (ns)']) for r in entries) / 1000
                         row['kernel_names'] = {r['Name']: int(r['Instances']) for r in entries}
