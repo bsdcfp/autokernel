@@ -81,13 +81,15 @@ def main():
                     row = {"started": started, "ended": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                            "occupancy_before": before, "occupancy_after": after, "contention_detected": bool(after),
                            "task": task, "case": case, "variant": variant, "profile": profile,
-                           "returncode": rc, "artifact": str(target) if target.exists() else None}
+                           "returncode": rc, "status": "missing-artifact", "artifact": str(target) if target.exists() else None}
                     if target.exists():
                         data = load_json(target)
                         row.update(status=data["status"], p50_ms=data.get("p50_ms"),
                                    max_errors=[x.get("max_abs_error") for x in data["correctness"]["checks"]])
                     if profile == "nsys":
                         row["nsys_report_exists"] = (out / (name + ".nsys-rep")).is_file()
+                    row["successful"] = (rc == 0 and row["status"] == "pass" and
+                                         (profile != "nsys" or row["nsys_report_exists"]))
                     plan["results"].append(row)
                     # Snapshot for progress only, raw measurements stay immutable.
                     (out / "progress.json").write_text(json.dumps(plan, indent=2) + "\n")
@@ -99,7 +101,7 @@ def main():
                         return 3
                     if rc == 124:
                         raise RuntimeError("GPU subprocess timed out; stop preflight and inspect device before continuing")
-    plan["status"] = "complete" if all(r["returncode"] == 0 for r in plan["results"]) else "completed-with-failures"
+    plan["status"] = "complete" if all(r["successful"] for r in plan["results"]) else "completed-with-failures"
     dump_new(out / "summary.json", plan)
     return 0 if plan["status"] == "complete" else 1
 

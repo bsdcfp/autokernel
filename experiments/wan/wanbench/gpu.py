@@ -35,8 +35,25 @@ def check_output(torch, fn, inputs, expected, atol, rtol):
     max_abs = max(e.max().item() for e in errors) if finite else None
     passed = finite and unchanged and all(bool((e <= atol + rtol * b.double().abs()).all().item())
                                          for e, b in zip(errors, targets))
+    details = {}
+    if finite:
+        violations = 0
+        worst_ratio = -1.0
+        for index, (actual, target, error) in enumerate(zip(actuals, targets, errors)):
+            tolerance = atol + rtol * target.double().abs()
+            ratio = error / tolerance
+            flat = int(ratio.reshape(-1).argmax().item())
+            value = float(ratio.reshape(-1)[flat].item())
+            violations += int((error > tolerance).sum().item())
+            if value > worst_ratio:
+                worst_ratio = value
+                details = {"worst_output_index": index, "worst_flat_index": flat,
+                           "worst_actual": float(actual.reshape(-1)[flat].item()),
+                           "worst_reference": float(target.reshape(-1)[flat].item()),
+                           "worst_allowed_abs_error": float(tolerance.reshape(-1)[flat].item())}
+        details.update(max_tolerance_ratio=worst_ratio, failed_elements=violations)
     return {"passed": passed, "finite": finite, "inputs_unchanged": unchanged,
-            "max_abs_error": max_abs, "atol": atol, "rtol": rtol}
+            "max_abs_error": max_abs, "atol": atol, "rtol": rtol, **details}
 
 
 def run_smoke(args, root):
