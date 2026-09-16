@@ -94,9 +94,10 @@ def main():
                         candidate = resolve_candidate(ROOT, mapping, task)
                         cmd += ["--candidate", str(candidate)]
                     if profile == "nsys":
+                        capture_end = [] if args.nsys_capture == "none" else ["--capture-range-end=stop"]
                         cmd = ["nsys", "profile", "--trace=cuda,nvtx,osrt", "--sample=none",
-                               "--capture-range=" + args.nsys_capture, "--capture-range-end=stop",
-                               "--output=" + str(out / name)] + cmd
+                               "--capture-range=" + args.nsys_capture,
+                               "--output=" + str(out / name)] + capture_end + cmd
                     before = occupied()
                     if before:
                         plan.update(status="blocked-gpu-busy", occupying_processes=before)
