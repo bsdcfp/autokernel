@@ -1,0 +1,8 @@
+{
+  "t1-norm-modulation": "runs/generate-t1-r02/kernel.py",
+  "wan-gated-residual": "runs/generate-wan-gated-residual-r01/kernel.py",
+  "wan-rmsnorm": "runs/generate-wan-rmsnorm-r01/kernel.py",
+  "wan-rope3d": "runs/generate-wan-rope3d-r01/kernel.py",
+  "t2-qknorm-rope": "runs/generate-t2-qknorm-rope-r02/kernel.py",
+  "wan-linear-gelu": "runs/generate-wan-linear-gelu-r02/kernel.py"
+}
