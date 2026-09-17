@@ -49,6 +49,7 @@ def main():
     ap.add_argument("--reviewed-candidates", action="store_true", help="operator confirms source review; this is not a sandbox")
     ap.add_argument("--profiles", action="store_true")
     ap.add_argument("--timing", choices=["single-call", "cuda-graph"], default="single-call")
+    ap.add_argument("--seed", type=int, default=17, help="base fixture seed; recorded in each measurement")
     ap.add_argument("--nsys-only", action="store_true", help="retry nsys capture without repeating valid measurements")
     ap.add_argument("--nsys-capture", choices=["cudaProfilerApi", "none"], default="cudaProfilerApi")
     ap.add_argument("--nsys-trace", choices=["cuda", "cuda-sw"], default="cuda-sw")
@@ -92,7 +93,7 @@ def main():
                     target = out / (name + ".json")
                     cmd = [sys.executable, "-m", "wanbench", "smoke", "--task", task,
                            "--case", case, "--variant", variant, "--profile", profile,
-                           "--samples", "50", "--warmup", "10", "--timing", args.timing,
+                           "--samples", "50", "--warmup", "10", "--timing", args.timing, "--seed", str(args.seed),
                            "--output", str(target)]
                     if variant == "candidate":
                         candidate = resolve_candidate(ROOT, mapping, task)
