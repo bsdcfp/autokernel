@@ -15,6 +15,7 @@ def main():
     ap.add_argument('--output', type=Path, required=True)
     ap.add_argument('--cases', nargs='+', choices=['debug','medium','long'], default=['debug','medium','long'])
     ap.add_argument('--followup', action='store_true')
+    ap.add_argument('--reduction-probe', action='store_true')
     ap.add_argument('--tasks', nargs='+', choices=['wan-linear-gelu','t2-qknorm-rope'], default=['wan-linear-gelu','t2-qknorm-rope'])
     args = ap.parse_args()
     out = args.output.resolve(); out.mkdir(parents=True, exist_ok=False)
@@ -34,7 +35,8 @@ def main():
                     result['status']='blocked-gpu-busy'; dump_new(out/'summary.json',result); return 3
                 target=out/f'{task}-{case}.json'
                 start=datetime.datetime.now(datetime.timezone.utc).isoformat()
-                rc=run_bounded([sys.executable,'precision_followup.py' if args.followup else 'precision_diagnose.py','--task',task,'--case',case,'--output',str(target)],out/f'{task}-{case}.log',env,420)
+                script='reduction_probe.py' if args.reduction_probe else ('precision_followup.py' if args.followup else 'precision_diagnose.py')
+                rc=run_bounded([sys.executable,script,'--task',task,'--case',case,'--output',str(target)],out/f'{task}-{case}.log',env,420)
                 row={'task':task,'case':case,'returncode':rc,'started':start,'artifact_exists':target.exists(),'occupancy_after':occupied()}
                 result['results'].append(row)
                 (out/'progress.json').write_text(__import__('json').dumps(result,indent=2))
