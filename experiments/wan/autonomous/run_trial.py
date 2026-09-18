@@ -92,6 +92,7 @@ If blocked, report the blocker and preserve the state; do not change the evaluat
         record = dict(trial=trial.name, status='running', upstream=UPSTREAM, gpu_uuid=GPU,
                       model=values.get('model'), reasoning_effort=values.get('model_reasoning_effort'),
                       host_sandbox_mode=values.get('sandbox_mode'), host_approval_policy=values.get('approval_policy'),
+                      effective_sandbox_mode='danger-full-access', effective_approval_policy='never',
                       framework_mode='native-kernelbench-custom-file', hard_budget_seconds=900,
                       prompt_sha256=sha(trial / 'prompt.txt'), protected_before=protected,
                       started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -99,7 +100,7 @@ If blocked, report the blocker and preserve the state; do not change the evaluat
         (trial / 'trial.json').write_text(json.dumps(record, indent=2))
         started = time.monotonic()
         with (trial / 'prompt.txt').open() as inp, (trial / 'agent-events.jsonl').open('w') as out, (trial / 'agent-stderr.log').open('w') as err:
-            proc = subprocess.Popen(['codex', 'exec',
+            proc = subprocess.Popen(['codex', 'exec', '-s', 'danger-full-access', '-c', 'approval_policy="never"',
                                      '--ephemeral', '--json', '-o', str(trial / 'final.txt'), '-'],
                                     cwd=work, env=env, stdin=inp, stdout=out, stderr=err, start_new_session=True)
             record['pid'] = proc.pid
