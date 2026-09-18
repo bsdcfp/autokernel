@@ -23,6 +23,7 @@ def main():
     ap.add_argument('--trial', type=Path, required=True)
     ap.add_argument('--reviewed-code', action='store_true', required=True)
     ap.add_argument('--output-name', default='acceptance')
+    ap.add_argument('--nsys-only', action='store_true')
     args = ap.parse_args()
     trial = args.trial.resolve()
     record = json.loads((trial / 'trial.json').read_text())
@@ -41,8 +42,9 @@ def main():
     # Expose only unchanged kernel helper dependencies, never upstream profile.py.
     shutil.copytree(trial / 'workspace/kernels', snapshot / 'kernels',
                     ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    (out / 'tmp').mkdir()
     env = dict(os.environ)
-    env.update(CUDA_VISIBLE_DEVICES=GPU, PYTHONUNBUFFERED='1',
+    env.update(CUDA_VISIBLE_DEVICES=GPU, PYTHONUNBUFFERED='1', TMPDIR=str(out / 'tmp'),
                PYTHONPATH=str(ROOT) + ':' + str(snapshot),
                WANBENCH_NSYS_CAPTURE='none', WANBENCH_NSYS_TRACE='cuda-sw')
     results = []
@@ -53,6 +55,8 @@ def main():
             return [line for line in p.stdout.splitlines() if GPU in line]
         jobs=[(case,variant,'none') for case in ('debug','medium','long') for variant in ('compile-default','candidate')]
         jobs += [('debug',variant,profile) for profile in ('torch','nsys') for variant in ('compile-default','candidate')]
+        if args.nsys_only:
+            jobs = [('debug',variant,'nsys') for variant in ('compile-default','candidate')]
         for case,variant,profile in jobs:
             if occupied():
                 raise RuntimeError('GPU busy; leave processes untouched')
