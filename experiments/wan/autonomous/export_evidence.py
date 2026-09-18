@@ -21,7 +21,7 @@ def main():
     work=trial/'workspace'
     for name in ['kernel.py','results.tsv','run.log']:
         if (work/name).is_file():chosen.append(work/name)
-    for folder in [work/'workspace',work/'.git',trial/'acceptance']:
+    for folder in [work/'workspace',work/'.git',*sorted(trial.glob('acceptance*'))]:
         if folder.exists():
             chosen.extend(p for p in folder.rglob('*') if p.is_file() and '__pycache__' not in p.parts and '.cache' not in p.parts)
     # Bound the transfer. Large traces stay on the experiment machine and are explicitly listed.

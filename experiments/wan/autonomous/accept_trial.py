@@ -22,6 +22,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--trial', type=Path, required=True)
     ap.add_argument('--reviewed-code', action='store_true', required=True)
+    ap.add_argument('--output-name', default='acceptance')
     args = ap.parse_args()
     trial = args.trial.resolve()
     record = json.loads((trial / 'trial.json').read_text())
@@ -29,15 +30,20 @@ def main():
         raise ValueError('trial must be finished with protected files unchanged')
     if digest(trial / 'workspace/kernel.py') != record['candidate_sha256']:
         raise ValueError('candidate changed after trial')
-    out = trial / 'acceptance'
+    if not args.output_name.startswith('acceptance') or Path(args.output_name).name != args.output_name:
+        raise ValueError('acceptance output must be a fresh local directory name')
+    out = trial / args.output_name
     out.mkdir(exist_ok=False)
     snapshot = out / 'candidate'
     snapshot.mkdir()
     shutil.copy2(trial / 'workspace/kernel.py', snapshot / 'kernel.py')
     shutil.copy2(Path(__file__).with_name('external_adapter.py'), snapshot / 'adapter.py')
+    # Expose only unchanged kernel helper dependencies, never upstream profile.py.
+    shutil.copytree(trial / 'workspace/kernels', snapshot / 'kernels',
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
     env = dict(os.environ)
     env.update(CUDA_VISIBLE_DEVICES=GPU, PYTHONUNBUFFERED='1',
-               PYTHONPATH=str(ROOT) + ':' + str(trial / 'workspace'),
+               PYTHONPATH=str(ROOT) + ':' + str(snapshot),
                WANBENCH_NSYS_CAPTURE='none', WANBENCH_NSYS_TRACE='cuda-sw')
     results = []
     with (ROOT / 'gpu3.lock').open('a') as lock:
