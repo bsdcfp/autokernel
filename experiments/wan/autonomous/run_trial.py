@@ -56,7 +56,7 @@ def main():
                      '--level', '1', '--problem', '9001', '--source', 'file',
                      '--file-path', 'task.py', '--backend', 'triton'], work, env)
         (trial / 'setup.log').write_text(setup)
-        run(['git', 'init', '-b', 'codex/native-rmsnorm-r01'], work)
+        run(['git', 'init', '-b', 'codex/' + trial.name], work)
         run(['git', 'config', 'user.name', 'AutoKernel Trial'], work)
         run(['git', 'config', 'user.email', 'autokernel-trial@localhost'], work)
         run(['git', 'add', '.'], work)
@@ -91,6 +91,7 @@ If blocked, report the blocker and preserve the state; do not change the evaluat
         values = tomllib.loads(cfg.read_text()) if cfg.exists() else {}
         record = dict(trial=trial.name, status='running', upstream=UPSTREAM, gpu_uuid=GPU,
                       model=values.get('model'), reasoning_effort=values.get('model_reasoning_effort'),
+                      host_sandbox_mode=values.get('sandbox_mode'), host_approval_policy=values.get('approval_policy'),
                       framework_mode='native-kernelbench-custom-file', hard_budget_seconds=900,
                       prompt_sha256=sha(trial / 'prompt.txt'), protected_before=protected,
                       started_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -98,7 +99,7 @@ If blocked, report the blocker and preserve the state; do not change the evaluat
         (trial / 'trial.json').write_text(json.dumps(record, indent=2))
         started = time.monotonic()
         with (trial / 'prompt.txt').open() as inp, (trial / 'agent-events.jsonl').open('w') as out, (trial / 'agent-stderr.log').open('w') as err:
-            proc = subprocess.Popen(['codex', 'exec', '-s', 'workspace-write', '-c', 'approval_policy="never"',
+            proc = subprocess.Popen(['codex', 'exec',
                                      '--ephemeral', '--json', '-o', str(trial / 'final.txt'), '-'],
                                     cwd=work, env=env, stdin=inp, stdout=out, stderr=err, start_new_session=True)
             record['pid'] = proc.pid
