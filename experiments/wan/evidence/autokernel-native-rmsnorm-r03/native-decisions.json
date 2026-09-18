@@ -1,0 +1,91 @@
+{
+  "source": "remote workspace/results.tsv; selected fields, timings as rounded by native harness",
+  "columns": [
+    "experiment",
+    "hypothesis_summary",
+    "candidate_ms",
+    "eager_ms",
+    "reported_eager_speedup",
+    "decision"
+  ],
+  "rows": [
+    [
+      0,
+      "Reference baseline",
+      0.1283,
+      0.1284,
+      1.001,
+      "baseline"
+    ],
+    [
+      1,
+      "Triton: one row per CTA, four warps",
+      0.045,
+      0.1345,
+      2.987,
+      "keep"
+    ],
+    [
+      2,
+      "Triton: four rows per CTA",
+      0.0247,
+      0.1277,
+      5.18,
+      "keep"
+    ],
+    [
+      3,
+      "CUDA: uint4 vector loads, four rows per CTA",
+      0.0247,
+      0.1339,
+      5.427,
+      "keep; ratio improved, latency tied"
+    ],
+    [
+      4,
+      "CUDA: eight rows per CTA, one row at S256",
+      0.0256,
+      0.1348,
+      5.274,
+      "revert"
+    ],
+    [
+      5,
+      "Four independent FP32 accumulation chains",
+      0.0245,
+      0.1341,
+      5.468,
+      "keep"
+    ],
+    [
+      6,
+      "Streaming output stores",
+      0.0253,
+      0.1343,
+      5.303,
+      "revert"
+    ],
+    [
+      7,
+      "Aligned vector path plus unaligned ATen fallback",
+      0.0162,
+      0.1288,
+      7.964,
+      "keep"
+    ],
+    [
+      "7_repeat",
+      "Unchanged final candidate",
+      0.0162,
+      0.1291,
+      7.99,
+      "keep final"
+    ]
+  ],
+  "other_records": {
+    "configuration_sweep": "S=256/7800/32760, rows-per-CTA=1/2/4/8/16; 15 diagnostic measurements recorded separately",
+    "resource_failure": "32 rows per CTA rejected after too many register resources launch failure",
+    "diagnostic_import_failure": "stdlib profile shadowing fixed in agent diagnostic script",
+    "agent_reported_final_stress": "36/36 passed; independent acceptance reported separately"
+  }
+}

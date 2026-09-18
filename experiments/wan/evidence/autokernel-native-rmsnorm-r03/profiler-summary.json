@@ -1,0 +1,36 @@
+{
+  "provenance": "Selected values transcribed from remote torch traces and nsys stats; full raw files remain on experiment host.",
+  "candidate_sha256": "c5efdcaa00fc7483766598bfa9c7a45f24dc9bc8809530091006ec9236055944",
+  "case": "debug",
+  "S": 256,
+  "calls_per_profile": 5,
+  "scoring": false,
+  "torch": {
+    "source": "acceptance-r02/debug-{variant}-torch.trace.json",
+    "compile-default": {
+      "kernel_instances": 5,
+      "total_gpu_kernel_us": 10.817
+    },
+    "candidate": {
+      "kernel_instances": 5,
+      "total_gpu_kernel_us": 10.081
+    }
+  },
+  "nsys": {
+    "source": "acceptance-nsys-r03/debug-{variant}-nsys.nsys-rep",
+    "command": "nsys stats --report cuda_gpu_kern_sum:nvtx-name --format csv REPORT",
+    "name_filter": "wanbench/wan-rmsnorm/",
+    "compile-default": {
+      "returncode": 0,
+      "kernel_instances": 5,
+      "total_gpu_kernel_ns": 10752,
+      "name": "wanbench/wan-rmsnorm/triton_red_fused__to_copy_add_mean_mul_pow_rsqrt_0"
+    },
+    "candidate": {
+      "returncode": 0,
+      "kernel_instances": 5,
+      "total_gpu_kernel_ns": 10080,
+      "name": "wanbench/wan-rmsnorm/rmsnorm_kernel(const __nv_bfloat16 *, const __nv_bfloat16 *, __nv_bfloat16 *, int)"
+    }
+  }
+}

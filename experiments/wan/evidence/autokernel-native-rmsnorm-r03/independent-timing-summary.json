@@ -1,0 +1,45 @@
+{
+  "source": "acceptance-r02/summary.json selected fields",
+  "seed": 607,
+  "timing": "CUDA Graph: 32 calls captured, 50 replays, per-call CUDA-event median",
+  "candidate_sha256": "c5efdcaa00fc7483766598bfa9c7a45f24dc9bc8809530091006ec9236055944",
+  "rows": [
+    {
+      "case": "debug",
+      "S": 256,
+      "compile_p50_ms": 0.0018390000332146883,
+      "candidate_p50_ms": 0.0018965000053867698,
+      "speedup": 0.9696810060591827,
+      "compile_precision": "pass",
+      "candidate_precision": "pass"
+    },
+    {
+      "case": "medium",
+      "S": 7800,
+      "compile_p50_ms": 0.010878999717533588,
+      "candidate_p50_ms": 0.005591500084847212,
+      "speedup": 1.9456316824559,
+      "compile_precision": "pass",
+      "candidate_precision": "pass"
+    },
+    {
+      "case": "long",
+      "S": 32760,
+      "compile_p50_ms": 0.05140649899840355,
+      "candidate_p50_ms": 0.03196900151669979,
+      "speedup": 1.608010777926552,
+      "compile_precision": "pass",
+      "candidate_precision": "pass"
+    }
+  ],
+  "paired_validation": {
+    "tool": "python -m wanbench compare-smoke",
+    "returncode_by_case": {
+      "debug": 0,
+      "medium": 0,
+      "long": 0
+    },
+    "status": "exploratory-only",
+    "limitations": "Synthetic inputs; no independent rounds or held-out real activations; not a framework score."
+  }
+}

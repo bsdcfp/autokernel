@@ -1,0 +1,35 @@
+{
+  "trial": "autokernel-native-rmsnorm-r03",
+  "status": "finished",
+  "upstream": "78435821cc3d5756ba6ee1785c397f6d8fa8c90d",
+  "gpu_uuid": "GPU-f1b73c7a-e7a3-dd24-a71a-a8f7ebe1f3e8",
+  "model": "gpt-6-astra",
+  "reasoning_effort": "high",
+  "effective_sandbox_mode": "danger-full-access",
+  "effective_approval_policy": "never",
+  "framework_mode": "native-kernelbench-custom-file",
+  "hard_budget_seconds": 900,
+  "prompt_sha256": "9a6cc8dd895a74ef228abe2842f0c19ed117c58e40f1593ab30b3ef2302d80c0",
+  "started_at": "2026-09-18T10:30:46.361438+00:00",
+  "operator_interventions": [],
+  "formal_ready": false,
+  "returncode": 0,
+  "stop_reason": "agent-exited",
+  "wall_seconds": 788.8509054356255,
+  "finished_at": "2026-09-18T10:43:55.215551+00:00",
+  "candidate_sha256": "c5efdcaa00fc7483766598bfa9c7a45f24dc9bc8809530091006ec9236055944",
+  "protected_changed": [],
+  "token_usage": {
+    "input_tokens": 2019653,
+    "cached_input_tokens": 1917312,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 19778,
+    "reasoning_output_tokens": 9535
+  },
+  "completed_item_counts": {
+    "agent_message": 10,
+    "command_execution": 56
+  },
+  "occupancy_after": "",
+  "provenance": "Selected fields transcribed from remote trial.json through authenticated AIS terminal; full raw file remains in trial directory."
+}
