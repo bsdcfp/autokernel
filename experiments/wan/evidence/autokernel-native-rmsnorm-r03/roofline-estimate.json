@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-20",
+  "kind": "analytical estimate using prior timing; not new GPU measurements",
+  "HBM_spec_TB_s": 8,
+  "source": "https://docs.nvidia.com/enterprise-reference-architectures/hgx-ai-factory/latest/components.html",
+  "assumptions": [
+    "Q = one input read + one output write + one shared weight read at BF16",
+    "F excludes rsqrt, conversions and machine-level scheduling/reduction overhead",
+    "Existing timing replays the same inputs; Q is not measured DRAM traffic",
+    "No performance ceiling or remaining speedup is established"
+  ],
+  "rows": [
+    {
+      "S": 256,
+      "D": 1536,
+      "basic_arithmetic_ops": 1573120,
+      "rsqrt_ops": 256,
+      "ideal_logical_bytes": 1575936,
+      "arithmetic_intensity": 0.9982131254061078,
+      "hypothetical_cold_HBM_lower_bound_us": 0.196992,
+      "existing_candidate_us": 1.8965000053867698,
+      "algorithmic_effective_TB_s": 0.8309707332052476,
+      "actual_HBM_bytes": null,
+      "actual_HBM_utilization": null,
+      "bottleneck_confirmed": false,
+      "simplified_FP32_arithmetic_time_us": 0.02097493333333333
+    },
+    {
+      "S": 7800,
+      "D": 1536,
+      "basic_arithmetic_ops": 47931000,
+      "rsqrt_ops": 7800,
+      "ideal_logical_bytes": 47926272,
+      "arithmetic_intensity": 1.0000986515287482,
+      "hypothetical_cold_HBM_lower_bound_us": 5.990784,
+      "existing_candidate_us": 5.591500084847212,
+      "algorithmic_effective_TB_s": 8.571272694760156,
+      "actual_HBM_bytes": null,
+      "actual_HBM_utilization": null,
+      "bottleneck_confirmed": false,
+      "simplified_FP32_arithmetic_time_us": 0.63908
+    },
+    {
+      "S": 32760,
+      "D": 1536,
+      "basic_arithmetic_ops": 201310200,
+      "rsqrt_ops": 32760,
+      "ideal_logical_bytes": 201280512,
+      "arithmetic_intensity": 1.0001474956502496,
+      "hypothetical_cold_HBM_lower_bound_us": 25.160064000000002,
+      "existing_candidate_us": 31.969001516699787,
+      "algorithmic_effective_TB_s": 6.296115063051193,
+      "actual_HBM_bytes": null,
+      "actual_HBM_utilization": null,
+      "bottleneck_confirmed": false,
+      "simplified_FP32_arithmetic_time_us": 2.684136
+    }
+  ],
+  "nominal_FP32_TFLOPS_per_GPU": 75,
+  "FP32_source": "https://www.nvidia.com/en-us/data-center/hgx/",
+  "FP32_derivation": "600 TFLOPS per HGX B300 eight-GPU system / 8; not measured on target"
+}
