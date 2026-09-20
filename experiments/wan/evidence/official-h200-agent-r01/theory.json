@@ -1,0 +1,26 @@
+{
+  "source": "coordinator post-run theoretical derivation, not Agent evidence",
+  "hardware_source": "https://www.nvidia.com/en-us/data-center/h200/",
+  "dense_fp16_tflops_assumption": 989.5,
+  "dense_peak_derivation": "H200 SXM published sparse 1979 TFLOPS divided by 2; 700 W observed device is consistent with SXM. This is a specification-based assumption, not calibrated sustained throughput.",
+  "hbm_tb_s": 4.8,
+  "conditions": "Logical single-read input/output bytes; cold-HBM term is conditional. Reused-input measurements may be served by cache. Tensor Core term excludes softmax, reductions, conversions, scheduling and synchronization.",
+  "cases": [
+    {
+      "case": "matmul_large",
+      "flops": 17179869184,
+      "logical_bytes": 25165824,
+      "ideal_tensor_time_us": 17.362171989893884,
+      "ideal_cold_hbm_time_us": 5.2428799999999995
+    },
+    {
+      "case": "causal_attention_large",
+      "useful_dot_flops": 8598323200,
+      "tile_dot_flops": 9126805504,
+      "logical_bytes": 33554432,
+      "native_reported_full_square_flops": 17179869184,
+      "ideal_tensor_time_us": 9.223653869631127,
+      "ideal_cold_hbm_time_us": 6.990506666666667
+    }
+  ]
+}

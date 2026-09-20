@@ -1,0 +1,371 @@
+{
+  "flash_attention_5": {
+    "candidate_sha256": "d7c29f299795660c43d438090306614ad5e0aeccf1c7ea9dfc1aa94d2f4f8e5a",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "CUDA events; 15 alternating paired rounds; 32 ordinary calls per sample; warm reused inputs; no CUDA Graph",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 40,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "batch": 2,
+          "heads": 32,
+          "seq_len": 1024,
+          "head_dim": 64
+        },
+        "dtype": "torch.float16",
+        "compile_us": 170.80500721931458,
+        "candidate_us": 60.019999742507935,
+        "paired_speedup": 2.851082978265954,
+        "logical_flops": 17179869184,
+        "logical_bytes": 33554432
+      }
+    ]
+  },
+  "matmul_6": {
+    "candidate_sha256": "e14faf1454b272fe6883338fd7fec34daf514d8455b2f5b9611aa0444aac3725",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "CUDA events; 15 alternating paired rounds; 32 ordinary calls per sample; warm reused inputs; no CUDA Graph",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 108,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "M": 2048,
+          "N": 2048,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 36.12900152802467,
+        "candidate_us": 30.704999342560768,
+        "paired_speedup": 1.1893538153780647,
+        "logical_flops": 17179869184,
+        "logical_bytes": 25165824
+      },
+      {
+        "case": "model_q_o",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 45.534998178482056,
+        "candidate_us": 26.05699934065342,
+        "paired_speedup": 1.783267630935493,
+        "logical_flops": 603979776,
+        "logical_bytes": 2752512
+      },
+      {
+        "case": "model_k_v",
+        "size": {
+          "M": 512,
+          "N": 256,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 43.90199854969978,
+        "candidate_us": 24.908000603318214,
+        "paired_speedup": 1.7585092280916397,
+        "logical_flops": 201326592,
+        "logical_bytes": 1441792
+      },
+      {
+        "case": "model_gate_up",
+        "size": {
+          "M": 512,
+          "N": 2048,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 44.30700093507767,
+        "candidate_us": 25.046000257134438,
+        "paired_speedup": 1.8051315602814355,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_down",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 43.338000774383545,
+        "candidate_us": 24.877000600099564,
+        "paired_speedup": 1.7352787310292461,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_logits",
+        "size": {
+          "M": 512,
+          "N": 32000,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 47.2790002822876,
+        "candidate_us": 60.19200012087822,
+        "paired_speedup": 0.7866856154875495,
+        "logical_flops": 25165824000,
+        "logical_bytes": 82706432
+      }
+    ]
+  },
+  "flash_attention_7": {
+    "candidate_sha256": "fc12c027cc7b02c49d4b67090b1d51c4967485d346cc95bb370b9e90109863d0",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "CUDA events; 15 alternating paired rounds; 32 ordinary calls per sample; warm reused inputs; no CUDA Graph",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 40,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "batch": 2,
+          "heads": 32,
+          "seq_len": 1024,
+          "head_dim": 64
+        },
+        "dtype": "torch.float16",
+        "compile_us": 170.7810014486313,
+        "candidate_us": 54.00199815630913,
+        "paired_speedup": 3.1600683524085285,
+        "logical_flops": 17179869184,
+        "logical_bytes": 33554432
+      }
+    ]
+  },
+  "matmul_3": {
+    "candidate_sha256": "622bada26915ad149d83a3489691d8662d28084949bc576ea54eed539f931fed",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "CUDA events; 15 alternating paired rounds; 32 ordinary calls per sample; warm reused inputs; no CUDA Graph",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 108,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "M": 2048,
+          "N": 2048,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 58.59600007534027,
+        "candidate_us": 41.88200086355209,
+        "paired_speedup": 1.4147511500243268,
+        "logical_flops": 17179869184,
+        "logical_bytes": 25165824
+      },
+      {
+        "case": "model_q_o",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 43.75699907541275,
+        "candidate_us": 25.533000007271767,
+        "paired_speedup": 1.749073815816508,
+        "logical_flops": 603979776,
+        "logical_bytes": 2752512
+      },
+      {
+        "case": "model_k_v",
+        "size": {
+          "M": 512,
+          "N": 256,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 42.17100143432617,
+        "candidate_us": 24.13100004196167,
+        "paired_speedup": 1.7666946102448289,
+        "logical_flops": 201326592,
+        "logical_bytes": 1441792
+      },
+      {
+        "case": "model_gate_up",
+        "size": {
+          "M": 512,
+          "N": 2048,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 41.83200001716614,
+        "candidate_us": 24.315999820828438,
+        "paired_speedup": 1.7289104314379031,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_down",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 42.32100024819374,
+        "candidate_us": 24.59299936890602,
+        "paired_speedup": 1.7040640255421762,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_logits",
+        "size": {
+          "M": 512,
+          "N": 32000,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 45.60200124979019,
+        "candidate_us": 60.17500162124634,
+        "paired_speedup": 0.7590994918214875,
+        "logical_flops": 25165824000,
+        "logical_bytes": 82706432
+      }
+    ]
+  },
+  "flash_attention_7-graph": {
+    "candidate_sha256": "fc12c027cc7b02c49d4b67090b1d51c4967485d346cc95bb370b9e90109863d0",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "Post-run timing diagnosis: CUDA Graph with 32 calls; 15 alternating paired replays; warm reused inputs; separate from ordinary-call score",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 40,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "batch": 2,
+          "heads": 32,
+          "seq_len": 1024,
+          "head_dim": 64
+        },
+        "dtype": "torch.float16",
+        "compile_us": 166.43059253692627,
+        "candidate_us": 51.20343714952469,
+        "paired_speedup": 3.2506150317887075,
+        "logical_flops": 17179869184,
+        "logical_bytes": 33554432
+      }
+    ]
+  },
+  "matmul_3-graph": {
+    "candidate_sha256": "622bada26915ad149d83a3489691d8662d28084949bc576ea54eed539f931fed",
+    "all_correct": true,
+    "baseline": "torch.compile(reference, mode=default)",
+    "timing": "Post-run timing diagnosis: CUDA Graph with 32 calls; 15 alternating paired replays; warm reused inputs; separate from ordinary-call score",
+    "float32_matmul_precision": "high",
+    "allow_tf32": true,
+    "allow_fp16_reduced_precision_reduction": true,
+    "checks": 108,
+    "performance": [
+      {
+        "case": "large",
+        "size": {
+          "M": 2048,
+          "N": 2048,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 26.643531396985054,
+        "candidate_us": 32.260436564683914,
+        "paired_speedup": 0.8242557118172386,
+        "logical_flops": 17179869184,
+        "logical_bytes": 25165824
+      },
+      {
+        "case": "model_q_o",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 3.892843844369054,
+        "candidate_us": 9.49359405785799,
+        "paired_speedup": 0.41021769560273214,
+        "logical_flops": 603979776,
+        "logical_bytes": 2752512
+      },
+      {
+        "case": "model_k_v",
+        "size": {
+          "M": 512,
+          "N": 256,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 3.465906251221895,
+        "candidate_us": 9.361499920487404,
+        "paired_speedup": 0.3701655870946468,
+        "logical_flops": 201326592,
+        "logical_bytes": 1441792
+      },
+      {
+        "case": "model_gate_up",
+        "size": {
+          "M": 512,
+          "N": 2048,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 4.835656378418207,
+        "candidate_us": 9.450062178075314,
+        "paired_speedup": 0.5116903776402312,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_down",
+        "size": {
+          "M": 512,
+          "N": 768,
+          "K": 2048
+        },
+        "dtype": "torch.float16",
+        "compile_us": 6.068156100809574,
+        "candidate_us": 20.68621851503849,
+        "paired_speedup": 0.2936667795848086,
+        "logical_flops": 1610612736,
+        "logical_bytes": 6029312
+      },
+      {
+        "case": "model_logits",
+        "size": {
+          "M": 512,
+          "N": 32000,
+          "K": 768
+        },
+        "dtype": "torch.float16",
+        "compile_us": 49.07265678048134,
+        "candidate_us": 68.50187480449677,
+        "paired_speedup": 0.7203191525859478,
+        "logical_flops": 25165824000,
+        "logical_bytes": 82706432
+      }
+    ]
+  }
+}
