@@ -1,6 +1,6 @@
 # H200 Codex 宿主升级
 
-2026-09-20，用户授权升级 CLI 和模型。此目录仅保存不含凭据的配置，禁止加入 auth.json、API key 或登录日志。
+2026-09-20，用户授权升级 CLI 和模型。**升级已执行并确认 `codex-cli 0.155.1`；模型配置已更新，实际账户可用性待登录后验证。** 此目录仅保存不含凭据的配置，禁止加入 auth.json、API key 或登录日志。
 
 - 环境入口：`/aigc/engineering/fuping.chu/env/codex_env.sh`。
 - 共享 npm prefix：`/aigc/engineering/fuping.chu/.npm-global`。
@@ -14,3 +14,13 @@
 依据：[官方模型迁移说明](https://developers.openai.com/api/docs/guides/latest-model)、[官方登录说明](https://learn.chatgpt.com/docs/auth)。配置更新不等于认证成功；登录后还须核对账户实际可用模型。
 
 AutoKernel 上游代码、候选、评测器与门限均不属于此次升级范围。
+
+原配置在部署前已备份至 GitHub 提交 `fea8c06`；远端另保留 `config.before-20260920.toml`。已按原文件字节一致性校验后原子替换配置。
+
+用户在 Pod 内登录：
+
+```bash
+source /aigc/engineering/fuping.chu/env/codex_env.sh
+codex login --device-auth
+codex login status
+```
