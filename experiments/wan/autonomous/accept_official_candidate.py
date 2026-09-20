@@ -3,6 +3,8 @@
 This evaluator never supplies feedback to the optimization Agent.
 """
 import argparse
+# Reserve the stdlib module before the frozen repository adds its own profile.py.
+import cProfile
 import hashlib
 import importlib.util
 import json
@@ -64,7 +66,10 @@ def main():
                   source="coordinator post-run acceptance", correctness=[], performance=[],
                   baseline="torch.compile(reference, mode=default)",
                   timing="CUDA events; 15 alternating paired rounds; 32 ordinary calls per sample; warm reused inputs; no CUDA Graph",
-                  profile=args.profile)
+                  profile=args.profile,
+                  float32_matmul_precision=torch.get_float32_matmul_precision(),
+                  allow_tf32=torch.backends.cuda.matmul.allow_tf32,
+                  allow_fp16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction)
     save = lambda: (args.output / "result.json").write_text(json.dumps(record, indent=2))
     sizes = list(cfg["test_sizes"]) + list(cfg.get("edge_sizes", []))
     primary = next((x for x in cfg["test_sizes"] if x[0] == "large"), cfg["test_sizes"][-1])
@@ -92,6 +97,7 @@ def main():
                         record["correctness"].append(row)
                         save()
             record["all_correct"] = all(x["pass_"] for x in record["correctness"])
+            save()
             if not record["all_correct"]:
                 record["performance_status"] = "not scored: correctness failed"
                 save()
