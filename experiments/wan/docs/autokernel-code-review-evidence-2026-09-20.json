@@ -1,0 +1,186 @@
+{
+  "upstream": "78435821cc3d5756ba6ee1785c397f6d8fa8c90d",
+  "scope": [
+    "bench.py",
+    "profile.py",
+    "program.md",
+    "orchestrate.py",
+    "extract.py",
+    "verify.py",
+    "kernelbench/bench_kb.py",
+    "kernelbench/program_kb.md"
+  ],
+  "scope_matches_upstream": true,
+  "framework_modified": false,
+  "GPU_run": false,
+  "review_method": "Read-only source inspection; AST-extracted functions and in-memory mocked dependencies. Results summarized from review tool outputs; no real GPU or PyTorch correctness claim.",
+  "architect_status": "WATCH",
+  "recommendation": "Proceed with unchanged official-example reproduction; independently audit native success labels. No formal framework score.",
+  "findings": [
+    {
+      "id": "R1",
+      "severity": "P1",
+      "file": "kernelbench/bench_kb.py",
+      "lines": [
+        574,
+        593
+      ],
+      "issue": "Independent random parameter initialization without state synchronization",
+      "probe": "Same mock Model class used for reference and candidate through original main construction flow",
+      "observed_weights": [
+        0.052363598850944326,
+        0.08718667752263232
+      ],
+      "limitation": "Python random-parameter mock, not real PyTorch GPU test; does not affect stateless Wan RMSNorm task",
+      "recommendation": "For an independently versioned repair, establish identical initial parameters before comparison."
+    },
+    {
+      "id": "R2",
+      "severity": "P1",
+      "file": "verify.py",
+      "lines": [
+        532,
+        537,
+        557,
+        1222
+      ],
+      "issue": "Report counts loaded functions rather than actual replacements",
+      "probe": "Original OptimizedModelContext with mocked loader and unsupported flash_attention replacement",
+      "observed": {
+        "actual_applied": [],
+        "reported_kernel_count": 1
+      },
+      "recommendation": "Report actual module replacements and confirm optimized kernel execution; zero replacements cannot establish integration."
+    },
+    {
+      "id": "R3",
+      "severity": "P1",
+      "file": "bench.py",
+      "lines": [
+        168,
+        173,
+        177,
+        178,
+        184,
+        1073
+      ],
+      "issue": "Unknown B300 fallback and non-matching compute ceiling",
+      "probe": "Mock B300 name, hypothetical SM count 148; compare absent clock with hypothetical 1800000 kHz",
+      "observed": [
+        {
+          "clock_rate_kHz": null,
+          "fp16_TFLOPS": 500,
+          "fp32_TFLOPS": 250,
+          "bandwidth_GB_s": 2000
+        },
+        {
+          "clock_rate_kHz": 1800000,
+          "fp16_TFLOPS": 136.3968,
+          "fp32_TFLOPS": 68.1984,
+          "bandwidth_GB_s": 500
+        }
+      ],
+      "limitation": "These are mocked device-property responses, not measured B300 specifications.",
+      "recommendation": "Unknown hardware should expose unknown ceilings; validate device-specific bandwidth and matching instruction pipelines."
+    },
+    {
+      "id": "R4",
+      "severity": "P1",
+      "file": "orchestrate.py",
+      "lines": [
+        321,
+        535,
+        544
+      ],
+      "issue": "Per-kernel budget uses task-global start time",
+      "probe": "In-memory state with global start 121 minutes ago and second kernel first baseline",
+      "observed": "Time budget exhausted: 121 min",
+      "recommendation": "Track and accumulate actual active time per kernel separately from global budget."
+    },
+    {
+      "id": "R5",
+      "severity": "P2",
+      "file": "orchestrate.py",
+      "lines": [
+        128,
+        314,
+        557,
+        808
+      ],
+      "issue": "Peak-based stopping input remains None on standard record path",
+      "verification": "Initialization, CLI schema, record function and all pct_peak references inspected",
+      "recommendation": "Wire validated benchmark peak metrics into state; retain their precision and memory-level provenance."
+    },
+    {
+      "id": "R6",
+      "severity": "P2",
+      "file": "orchestrate.py",
+      "lines": [
+        307,
+        523
+      ],
+      "issue": "Execution failures classified as performance plateau",
+      "probe": "Five crash records in in-memory state",
+      "observed": "Plateau detected: 5 consecutive reverts",
+      "recommendation": "Separate operational failure, performance regression and statistical plateau counters."
+    },
+    {
+      "id": "R7",
+      "severity": "P2",
+      "file": "kernelbench/bench_kb.py",
+      "lines": [
+        616,
+        631,
+        640,
+        647,
+        695
+      ],
+      "issue": "Stability FAIL and determinism ERROR do not block overall fast_p success",
+      "probe": "Original main with correctness PASS, stability FAIL, determinism ERROR and mocked speedup 2",
+      "observed": {
+        "performance_called": true,
+        "summary_correctness": "PASS",
+        "speedup": 2
+      },
+      "limitation": "Auxiliary statuses are separately displayed. Intentional WARN for non-bitwise determinism is not classified as FAIL by this finding.",
+      "recommendation": "Make overall acceptance status explicit and account for failing required checks before publishing a success label."
+    }
+  ],
+  "capability_observations": [
+    {
+      "file": "profile.py",
+      "line": 477,
+      "probe": "Original estimate_roofline_position with rmsnorm, durations 1 and 10000 us, gpu=None",
+      "observed": [
+        "memory-bound",
+        "memory-bound"
+      ],
+      "interpretation": "Type-based heuristic, not measured bottleneck; does not prevent host LLM from acquiring better evidence."
+    },
+    {
+      "file": "program.md",
+      "lines": [
+        216,
+        224,
+        228,
+        273,
+        277
+      ],
+      "interpretation": "Explicit hypotheses, single-change iterations, correctness-first keep/revert and >=1% throughput gain are prescribed. Their execution must be assessed from agent traces."
+    },
+    {
+      "file": "orchestrate.py",
+      "lines": [
+        507,
+        550
+      ],
+      "probe": "Record baseline 1.0 keep, then 0.9 keep",
+      "observed": {
+        "experiments_kept": 2,
+        "consecutive_reverts": 0,
+        "recorded_correctness": "PASS"
+      },
+      "interpretation": "Recorder trusts host-supplied status; it is not an independent correctness controller."
+    }
+  ]
+}

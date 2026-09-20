@@ -2,6 +2,7 @@
 
 目标是通过开源框架源码与 B300 上的 Wan 实验，写清楚如何设计一个算子优化 Agent：原理、架构、设计模式及其证据。框架比较、算子性能和搜索成本为这些设计判断提供验证；各框架保留自己的搜索机制。
 
+- [AutoKernel 代码 Review](docs/autokernel-code-review-2026-09-20.zh.md)：按五项标准核对源码与影响实验结论的缺陷。
 - [自主能力评测协议 v2](docs/autonomous-evaluation-protocol.zh.md)：审计 Agent 自主取得性能证据并用于假设、验证和停止决策；原生与增强配置分开，协调方不补做框架能力。
 - [用法与性能上限补充核对](docs/bottleneck-and-native-example-audit-2026-09-20.zh.md)：官方示例复现边界、理论工作量、缓存口径与待补硬件计数器。
 - [首次自主实验报告](docs/autokernel-autonomous-r03-2026-09-18.zh.md)：运行中零干预，保留七次候选决策与独立验收结果。
