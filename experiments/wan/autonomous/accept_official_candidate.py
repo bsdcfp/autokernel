@@ -53,6 +53,7 @@ def main():
     ap.add_argument("--reference-root", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
     ap.add_argument("--profile", choices=["none", "torch", "nsys"], default="none")
+    ap.add_argument("--timing", choices=["ordinary", "graph"], default="ordinary")
     args = ap.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     sys.path.insert(0, str(args.reference_root))
@@ -70,6 +71,8 @@ def main():
                   float32_matmul_precision=torch.get_float32_matmul_precision(),
                   allow_tf32=torch.backends.cuda.matmul.allow_tf32,
                   allow_fp16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction)
+    if args.timing == "graph":
+        record["timing"] = "Post-run timing diagnosis: CUDA Graph with 32 calls; 15 alternating paired replays; warm reused inputs; separate from ordinary-call score"
     save = lambda: (args.output / "result.json").write_text(json.dumps(record, indent=2))
     sizes = list(cfg["test_sizes"]) + list(cfg.get("edge_sizes", []))
     primary = next((x for x in cfg["test_sizes"] if x[0] == "large"), cfg["test_sizes"][-1])
@@ -134,9 +137,30 @@ def main():
                     torch.cuda.synchronize()
                 torch.cuda.cudart().cudaProfilerStop()
             else:
+                timed_funcs, divisor = funcs, 1
+                if args.timing == "graph":
+                    graphs, outputs = {}, {}
+                    for name, fn in funcs.items():
+                        graph = torch.cuda.CUDAGraph()
+                        with torch.cuda.graph(graph):
+                            for _ in range(32):
+                                outputs[name] = fn()
+                        graphs[name] = graph
+                    fresh = inputs_for(label, size, dtype, 4099)
+                    for key, value in fresh.items():
+                        if isinstance(value, torch.Tensor):
+                            inputs[key].copy_(value)
+                    expected_fresh = ref(inputs)
+                    for name, graph in graphs.items():
+                        graph.replay()
+                        torch.cuda.synchronize()
+                        if not torch.allclose(outputs[name].float(), expected_fresh.float(), **cfg["tolerances"][dtype]):
+                            raise RuntimeError(name + " graph failed changed-input check")
+                    timed_funcs = {name:graph.replay for name,graph in graphs.items()}
+                    divisor = 32
                 pairs = []
                 for r in range(15):
-                    pair = {name:timer(funcs[name]) for name in (("compile","candidate") if r%2==0 else ("candidate","compile"))}
+                    pair = {name:timer(timed_funcs[name])/divisor for name in (("compile","candidate") if r%2==0 else ("candidate","compile"))}
                     pairs.append(pair)
                 record["performance"].append(dict(case=label, size=size, dtype=str(dtype),
                     compile_us=statistics.median(x["compile"] for x in pairs),
